@@ -1,0 +1,11 @@
+-r requirements.txt
+coverage
+flake8
+ipython
+mock
+pre-commit>=0.4.2
+pytest
+pytest-ipdb==0.1-prerelease2
+pyyaml
+PyStaticConfiguration
+simplejson
