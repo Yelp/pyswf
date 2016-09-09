@@ -24,7 +24,7 @@ setup(
     author=pyswf.__author__,
     author_email=pyswf.__email__,
     url='https://github.com/Yelp/pyswf/',  # TODO: add readthedocs.io documentation
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(exclude=['tests*', 'testing']),
     install_requires=[
         'boto3==1.2.1',
         'botocore==1.3.7',
@@ -38,7 +38,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
