@@ -2,6 +2,13 @@
 pyswf
 =======================================================
 
+.. image:: https://travis-ci.org/Yelp/pyswf.svg?branch=master
+    :target: https://travis-ci.org/Yelp/pyswf
+
+.. image:: https://coveralls.io/repos/github/Yelp/pyswf/badge.svg
+    :target: https://coveralls.io/github/Yelp/pyswf
+
+
 pyswf is a library that provides a pythonic way to interact with the boto3 SWF client. It provides a thin client above boto3 and tries to provide the same API as boto3's SWF client. This library tries to group the API calls into SWF's framework of deciders, activity runners, and a client that can initiate and terminate workflows. More information on inputs to boto3 can be found in the boto3 :class:`~SWF.Client` class.
 
 The library provides 4 clients: 
