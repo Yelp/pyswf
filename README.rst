@@ -2,11 +2,11 @@
 py_swf
 =======================================================
 
-.. image:: https://travis-ci.org/Yelp/py_swf.svg?branch=master
-    :target: https://travis-ci.org/Yelp/py_swf
+.. image:: https://travis-ci.org/Yelp/pyswf.svg?branch=master
+    :target: https://travis-ci.org/Yelp/pyswf
 
-.. image:: https://coveralls.io/repos/github/Yelp/py_swf/badge.svg?branch=master
-    :target: https://coveralls.io/github/Yelp/py_swf?branch=master
+.. image:: https://coveralls.io/repos/github/Yelp/pyswf/badge.svg?branch=master
+    :target: https://coveralls.io/github/Yelp/pyswf?branch=master
 
 .. image:: https://readthedocs.org/projects/py-swf/badge/?version=latest
     :target: http://py-swf.readthedocs.io/en/latest/?badge=latest
