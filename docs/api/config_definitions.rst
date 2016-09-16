@@ -1,6 +1,6 @@
 ===========================
-pyswf.config_definitions
+py_swf.config_definitions
 ===========================
 
-.. automodule:: pyswf.config_definitions
+.. automodule:: py_swf.config_definitions
    :members:

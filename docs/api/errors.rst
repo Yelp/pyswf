@@ -1,6 +1,6 @@
 ===============
-pyswf.errors
+py_swf.errors
 ===============
 
-.. automodule:: pyswf.errors
+.. automodule:: py_swf.errors
    :members:

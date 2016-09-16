@@ -1,6 +1,6 @@
 ==============================
-pyswf.clients.activity_task
+py_swf.clients.activity_task
 ==============================
 
-.. automodule:: pyswf.clients.activity_task
+.. automodule:: py_swf.clients.activity_task
    :members:

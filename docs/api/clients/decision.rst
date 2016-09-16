@@ -1,6 +1,6 @@
 =========================
-pyswf.clients.decision
+py_swf.clients.decision
 =========================
 
-.. automodule:: pyswf.clients.decision
+.. automodule:: py_swf.clients.decision
    :members:

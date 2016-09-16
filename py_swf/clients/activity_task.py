@@ -6,7 +6,7 @@ from collections import namedtuple
 
 from botocore.vendored.requests.exceptions import ReadTimeout
 
-from pyswf.errors import NoTaskFound
+from py_swf.errors import NoTaskFound
 
 
 __all__ = ['ActivityTaskClient', 'ActivityTask']
@@ -23,7 +23,7 @@ class ActivityTaskClient(object):
     """A client that provides a pythonic API for polling and responding to activity tasks through an SWF boto3 client.
 
     :param activity_task_config: Contains SWF values commonly used when making SWF api calls.
-    :type activity_task_config: :class:`~pyswf.config_definitions.ActivityTaskConfig`
+    :type activity_task_config: :class:`~py_swf.config_definitions.ActivityTaskConfig`
     :param boto_client: A raw SWF boto3 client.
     :type boto_client: :class:`~SWF.Client`
     """
@@ -42,7 +42,7 @@ class ActivityTaskClient(object):
         :type identity: string
         :return: An activity task to execute.
         :rtype: ActivityTask
-        :raises pyswf.errors.NoTaskFound: Raised when polling for an activity times out without receiving any tasks.
+        :raises py_swf.errors.NoTaskFound: Raised when polling for an activity times out without receiving any tasks.
         """
         kwargs = dict(
             domain=self.activity_task_config.domain,
@@ -80,7 +80,7 @@ class ActivityTaskClient(object):
 
         Passthrough to :meth:`~SWF.Client.respond_activity_task_completed`.
 
-        :param task_token: The task_token returned from :meth:`~pyswf.clients.activity_task.ActivityTaskClient.poll`.
+        :param task_token: The task_token returned from :meth:`~py_swf.clients.activity_task.ActivityTaskClient.poll`.
         :type task_token: string
         :param result: The result of the executed activity task.
         :type result: string
@@ -97,7 +97,7 @@ class ActivityTaskClient(object):
 
         Passthrough to :meth:`~SWF.Client.respond_activity_task_failed`.
 
-        :param task_token: The task_token returned from :meth:`~pyswf.clients.activity_task.ActivityTaskClient.poll`.
+        :param task_token: The task_token returned from :meth:`~py_swf.clients.activity_task.ActivityTaskClient.poll`.
         :type task_token: string
         :param reason: Description of the error that may assist in diagnostics
         :type reason: string

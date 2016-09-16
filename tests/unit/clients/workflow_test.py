@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyswf.clients.workflow import WorkflowClient
+from py_swf.clients.workflow import WorkflowClient
 
 
 @pytest.fixture
