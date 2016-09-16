@@ -10,7 +10,7 @@ class WorkflowClient(object):
     """A client that provides a pythonic API for starting and terminating workflows through an SWF boto3 client.
 
     :param workflow_client_config: Contains SWF values commonly used when making SWF api calls.
-    :type workflow_client_config: :class:`~pyswf.config_definitions.WorkflowClientConfig`
+    :type workflow_client_config: :class:`~py_swf.config_definitions.WorkflowClientConfig`
     :param boto_client: A raw SWF boto3 client.
     :type boto_client: :class:`~SWF.Client`
     """

@@ -4,9 +4,9 @@ Installation
 
 At the command line either via pip::
 
-    $ pip install pyswf
+    $ pip install py_swf
 
 Or, if you have virtualenvwrapper installed::
 
-    $ mkvirtualenv pyswf
-    $ pip install pyswf
+    $ mkvirtualenv py_swf
+    $ pip install py_swf

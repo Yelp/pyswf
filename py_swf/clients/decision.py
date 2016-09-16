@@ -6,7 +6,7 @@ from collections import namedtuple
 
 from botocore.vendored.requests.exceptions import ReadTimeout
 
-from pyswf.errors import NoTaskFound
+from py_swf.errors import NoTaskFound
 
 
 __all__ = ['DecisionClient', 'DecisionTask']
@@ -41,7 +41,7 @@ class DecisionClient(object):
     """A client that provides a pythonic API for polling and responding to decision tasks through an SWF boto3 client.
 
     :param decision_config: Contains SWF values commonly used when making SWF api calls.
-    :type decision_config: :class:`~pyswf.config_definitions.DecisionConfig`
+    :type decision_config: :class:`~py_swf.config_definitions.DecisionConfig`
     :param boto_client: A raw SWF boto3 client.
     :type boto_client: :class:`~SWF.Client`
     """
@@ -54,7 +54,7 @@ class DecisionClient(object):
         """Opens a connection to AWS and long-polls for decision tasks.
         When a decision is available, this function will return with exactly one decision task to execute.
         Only returns a contiguous subset of the most recent events.
-        If you want to grab the entire history for a workflow, use :meth:`~pyswf.decision.DecisionClient.walk_execution_history`
+        If you want to grab the entire history for a workflow, use :meth:`~py_swf.decision.DecisionClient.walk_execution_history`
 
         Passthrough to :meth:`~SWF.Client.poll_for_decision_task`.
 
@@ -65,7 +65,7 @@ class DecisionClient(object):
         :type use_raw_event_history: bool
         :return: A decision task to execute.
         :rtype: DecisionTask
-        :raises pyswf.errors.NoTaskFound: Raised when polling for a decision task times out without receiving any tasks.
+        :raises py_swf.errors.NoTaskFound: Raised when polling for a decision task times out without receiving any tasks.
         """
         kwargs = dict(
             domain=self.decision_config.domain,
@@ -115,9 +115,9 @@ class DecisionClient(object):
 
         See :meth:`~SWF.Client.get_workflow_execution_history` for more information.
 
-        :param workflow_id: The workflow_id returned from :meth:`~pyswf.clients.decision.DecisionClient.poll`.
+        :param workflow_id: The workflow_id returned from :meth:`~py_swf.clients.decision.DecisionClient.poll`.
         :type identity: string
-        :param workflow_run_id: The workflow_run_id returned from :meth:`~pyswf.clients.decision.DecisionClient.poll`.
+        :param workflow_run_id: The workflow_run_id returned from :meth:`~py_swf.clients.decision.DecisionClient.poll`.
         :type identity: string
         :param reverse_order: Passthru for reverseOrder to :meth:`~SWF.Client.get_workflow_execution_history`
         :type identity: bool
@@ -162,7 +162,7 @@ class DecisionClient(object):
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
 
-        :param task_token: The task_token returned from :meth:`~pyswf.clients.decision.DecisionClient.poll`.
+        :param task_token: The task_token returned from :meth:`~py_swf.clients.decision.DecisionClient.poll`.
         :type identity: string
         :param activity_id: A unique identifier for the activity task.
         :type identity: string
@@ -193,7 +193,7 @@ class DecisionClient(object):
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
 
-        :param task_token: The task_token returned from :meth:`~pyswf.clients.decision.DecisionClient.poll`.
+        :param task_token: The task_token returned from :meth:`~py_swf.clients.decision.DecisionClient.poll`.
         :type identity: string
         :param result: Freeform text that represents the final result of the workflow.
         :type identity: string

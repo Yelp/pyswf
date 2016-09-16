@@ -1,6 +1,6 @@
 ======================
-pyswf.clients.admin
+py_swf.clients.admin
 ======================
 
-.. automodule:: pyswf.clients.admin
+.. automodule:: py_swf.clients.admin
    :members:

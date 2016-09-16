@@ -6,9 +6,9 @@ import mock
 import pytest
 from botocore.vendored.requests.exceptions import ReadTimeout
 
-from pyswf.clients.activity_task import ActivityTask
-from pyswf.clients.activity_task import ActivityTaskClient
-from pyswf.errors import NoTaskFound
+from py_swf.clients.activity_task import ActivityTask
+from py_swf.clients.activity_task import ActivityTaskClient
+from py_swf.errors import NoTaskFound
 from testing.util import DictMock
 
 

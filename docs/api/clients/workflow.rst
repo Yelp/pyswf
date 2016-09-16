@@ -1,6 +1,6 @@
 =========================
-pyswf.clients.workflow
+py_swf.clients.workflow
 =========================
 
-.. automodule:: pyswf.clients.workflow
+.. automodule:: py_swf.clients.workflow
    :members:

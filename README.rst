@@ -1,18 +1,18 @@
 =======================================================
-pyswf
+py_swf
 =======================================================
 
-.. image:: https://travis-ci.org/Yelp/pyswf.svg?branch=master
-    :target: https://travis-ci.org/Yelp/pyswf
+.. image:: https://travis-ci.org/Yelp/py_swf.svg?branch=master
+    :target: https://travis-ci.org/Yelp/py_swf
 
-.. image:: https://coveralls.io/repos/github/Yelp/pyswf/badge.svg?branch=master
-    :target: https://coveralls.io/github/Yelp/pyswf?branch=master
+.. image:: https://coveralls.io/repos/github/Yelp/py_swf/badge.svg?branch=master
+    :target: https://coveralls.io/github/Yelp/py_swf?branch=master
 
 .. image:: https://readthedocs.org/projects/py-swf/badge/?version=latest
     :target: http://py-swf.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-pyswf is a library that provides a pythonic way to interact with the boto3 SWF client. It provides a thin client above boto3 and tries to provide the same API as boto3's SWF client. This library tries to group the API calls into SWF's framework of deciders, activity runners, and a client that can initiate and terminate workflows. More information on inputs to boto3 can be found in the boto3 :class:`~SWF.Client` class.
+py_swf is a library that provides a pythonic way to interact with the boto3 SWF client. It provides a thin client above boto3 and tries to provide the same API as boto3's SWF client. This library tries to group the API calls into SWF's framework of deciders, activity runners, and a client that can initiate and terminate workflows. More information on inputs to boto3 can be found in the boto3 :class:`~SWF.Client` class.
 
 The library provides 4 clients: 
  - A client that allows starting and force-termination of workflows.
@@ -27,8 +27,8 @@ Example daemon that listens on decision tasks
 .. code-block:: python
 
         import boto3
-        from pyswf.config_definitions import DecisionConfig
-        from pyswf.clients.decision import DecisionClient
+        from py_swf.config_definitions import DecisionConfig
+        from py_swf.clients.decision import DecisionClient
 
         boto_client =  boto3.Session(...).client('swf')
         decision_config = DecisionConfig(...)
@@ -45,15 +45,15 @@ Example daemon that listens on decision tasks
                         ...
                 )
 
-The heart of the daemon is the :class:`~pyswf.clients.decision.DecisionClient`. You must provide a valid bare boto3 client, and :class:`~pyswf.config_definitions.DecisionConfig` which represents common SWF inputs, such as domain, and some timeouts. 
+The heart of the daemon is the :class:`~py_swf.clients.decision.DecisionClient`. You must provide a valid bare boto3 client, and :class:`~py_swf.config_definitions.DecisionConfig` which represents common SWF inputs, such as domain, and some timeouts. 
 
 Likewise, you must implement an activity runner:
 
 .. code-block:: python
         
         import boto3
-        from pyswf.config_definitions import ActivityTaskConfig
-        from pyswf.clients.activity_task import ActivityTaskClient
+        from py_swf.config_definitions import ActivityTaskConfig
+        from py_swf.clients.activity_task import ActivityTaskClient
 
         boto_client =  boto3.Session(...).client('swf')
         activity_task_config = ActivityTaskConfig(...)

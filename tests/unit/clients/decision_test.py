@@ -8,10 +8,10 @@ import mock
 import pytest
 from botocore.vendored.requests.exceptions import ReadTimeout
 
-from pyswf.clients.decision import DecisionClient
-from pyswf.clients.decision import DecisionTask
-from pyswf.clients.decision import nametuplefy
-from pyswf.errors import NoTaskFound
+from py_swf.clients.decision import DecisionClient
+from py_swf.clients.decision import DecisionTask
+from py_swf.clients.decision import nametuplefy
+from py_swf.errors import NoTaskFound
 from testing.util import DictMock
 
 

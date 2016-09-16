@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import pytest
 from botocore.exceptions import ClientError
 
-from pyswf.clients.admin import idempotent_create
-from pyswf.clients.admin import WorkflowRegistrar
+from py_swf.clients.admin import idempotent_create
+from py_swf.clients.admin import WorkflowRegistrar
 
 
 @pytest.fixture
