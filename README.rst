@@ -12,6 +12,9 @@ py_swf
     :target: http://py-swf.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://img.shields.io/pypi/v/py-swf.svg
+    :target: https://pypi.python.org/pypi/py-swf/
+
 py_swf is a library that provides a pythonic way to interact with the boto3 SWF client. It provides a thin client above boto3 and tries to provide the same API as boto3's SWF client. This library tries to group the API calls into SWF's framework of deciders, activity runners, and a client that can initiate and terminate workflows. More information on inputs to boto3 can be found in the boto3 :class:`~SWF.Client` class.
 
 The library provides 4 clients: 
