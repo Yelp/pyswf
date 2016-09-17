@@ -30,7 +30,7 @@ setup(
         'botocore==1.3.7',
     ],
     zip_safe=False,
-    keywords='py_swf',
+    keywords=['py_swf'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
