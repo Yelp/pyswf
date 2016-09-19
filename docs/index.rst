@@ -20,4 +20,4 @@ Feedback
 ========
 
 If you have any suggestions or questions about **py_swf** feel free to open an issue at our github page at
-https://github.com/Yelp/py_swf
+https://github.com/Yelp/pyswf

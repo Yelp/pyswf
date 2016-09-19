@@ -12,7 +12,7 @@ doclink = """
 Documentation
 -------------
 
-The full documentation is at https://github.com/Yelp/py_swf/"""
+The full documentation is at http://py-swf.readthedocs.io/en/latest/"""
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
@@ -23,14 +23,14 @@ setup(
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
     author=py_swf.__author__,
     author_email=py_swf.__email__,
-    url='https://github.com/Yelp/py_swf/',  # TODO: add readthedocs.io documentation
+    url='http://py-swf.readthedocs.io/en/latest/',
     packages=find_packages(exclude=['tests*', 'testing']),
     install_requires=[
         'boto3==1.2.1',
         'botocore==1.3.7',
     ],
     zip_safe=False,
-    keywords=['py_swf'],
+    keywords=['py_swf', 'swf', 'amazon', 'workflow'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
