@@ -8,6 +8,8 @@ from botocore.vendored.requests.exceptions import ReadTimeout
 
 from py_swf.errors import NoTaskFound
 
+from py_swf.clients.util import set_logger_on_boto_client
+
 
 __all__ = ['ActivityTaskClient', 'ActivityTask']
 
@@ -31,6 +33,7 @@ class ActivityTaskClient(object):
     def __init__(self, activity_task_config, boto_client):
         self.activity_task_config = activity_task_config
         self.boto_client = boto_client
+        set_logger_on_boto_client(self.boto_client)
 
     def poll(self, identity=None):
         """Opens a connection to AWS and long-polls for activity tasks.

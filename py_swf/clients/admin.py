@@ -6,6 +6,8 @@ import functools
 
 from botocore.exceptions import ClientError
 
+from py_swf.clients.util import set_logger_on_boto_client
+
 
 __all__ = ['WorkflowRegistrar']
 
@@ -34,6 +36,7 @@ class WorkflowRegistrar(object):
 
     def __init__(self, boto_client):
         self.boto_client = boto_client
+        set_logger_on_boto_client(self.boto_client)
 
     @idempotent_create
     def register_domain(self, name, description=None, retention=90):

@@ -14,9 +14,9 @@ from py_swf.clients.activity_task import ActivityTaskClient
 from py_swf.clients.admin import WorkflowRegistrar
 from py_swf.clients.decision import DecisionClient
 from py_swf.clients.workflow import WorkflowClient
-from py_swf.config_definitions import ActivityTaskConfig
-from py_swf.config_definitions import DecisionConfig
-from py_swf.config_definitions import WorkflowClientConfig
+from py_swf.config.config_definitions import ActivityTaskConfig
+from py_swf.config.config_definitions import DecisionConfig
+from py_swf.config.config_definitions import WorkflowClientConfig
 
 
 def load_testing_config():

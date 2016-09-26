@@ -10,6 +10,9 @@
 # Develoopment Environment
 virtualenv_run
 
+#pycharm
+.idea
+
 # Packages
 *.egg
 *.egg-info
