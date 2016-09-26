@@ -55,7 +55,7 @@ Likewise, you must implement an activity runner:
 .. code-block:: python
         
         import boto3
-        from py_swf.config_definitions import ActivityTaskConfig
+        from py_swf.config.config_definitions import ActivityTaskConfig
         from py_swf.clients.activity_task import ActivityTaskClient
 
         boto_client =  boto3.Session(...).client('swf')

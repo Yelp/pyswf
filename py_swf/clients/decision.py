@@ -6,6 +6,8 @@ from collections import namedtuple
 
 from botocore.vendored.requests.exceptions import ReadTimeout
 
+from py_swf.clients.util import set_logger_on_boto_client
+
 from py_swf.errors import NoTaskFound
 
 
@@ -49,6 +51,7 @@ class DecisionClient(object):
     def __init__(self, decision_config, boto_client):
         self.decision_config = decision_config
         self.boto_client = boto_client
+        set_logger_on_boto_client(self.boto_client)
 
     def poll(self, identity=None, use_raw_event_history=False):
         """Opens a connection to AWS and long-polls for decision tasks.
