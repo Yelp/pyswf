@@ -28,7 +28,6 @@ setup(
     install_requires=[
         'boto3==1.2.1',
         'botocore==1.3.7',
-        'PyStaticConfiguration==0.10.1'
     ],
     zip_safe=False,
     keywords=['py_swf', 'swf', 'amazon', 'workflow'],
