@@ -77,6 +77,24 @@ boto_available_methods = [
 ]
 
 
+def _get_boto_method(api_name):
+    method_name = ''
+    seg = ''
+    index = 0
+    while index < len(api_name):
+        if api_name[index].isupper():
+            if method_name:
+                method_name += '_'
+            method_name += seg
+            seg = api_name[index].lower()
+        else:
+            seg += api_name[index]
+        index += 1
+    if seg:
+        method_name += '_' + seg
+    return method_name
+
+
 def build_boto_amazon_api_call_list():
     boto_amazon_api_calls = []
     for api in amazon_api_list:
@@ -156,19 +174,4 @@ def _get_api_name(name):
     return translated_name
 
 
-def _get_boto_method(api_name):
-    method_name = ''
-    seg = ''
-    index = 0
-    while index < len(api_name):
-        if api_name[index].isupper():
-            if method_name:
-                method_name += '_'
-            method_name += seg
-            seg = api_name[index].lower()
-        else:
-            seg += api_name[index]
-        index += 1
-    if seg:
-        method_name += '_' + seg
-    return method_name
+
