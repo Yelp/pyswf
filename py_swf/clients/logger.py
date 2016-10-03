@@ -137,11 +137,11 @@ def _add_logger_to_api_call(boto_func, logger):
     a decorator to log calls to amazon apis
     :param boto_client: a reference to boto_client
     :param func_name: name of method that calls amazon apis
-    :param logger: logger to log info
+    :param logger: logger to log info, must be callable
     :return: a callable object
     """
     def log_amazon_api_call(*args, **kwargs):
-        logger(_get_api_name(boto_func.__name__))
+        logger(amazon_api_name=_get_api_name(boto_func.__name__))
         return boto_func(*args, **kwargs)
     # set __wrapped__ for test to make sure it is actually decorated
     log_amazon_api_call.__wrapped__ = boto_func.__name__
