@@ -142,7 +142,7 @@ def _add_logger_to_api_call(boto_func, logger):
     """
     def log_amazon_api_call(*args, **kwargs):
         logger(_get_api_name(boto_func.__name__))
-        return boto_func(args, **kwargs)
+        return boto_func(*args, **kwargs)
     # set __wrapped__ for test to make sure it is actually decorated
     log_amazon_api_call.__wrapped__ = boto_func.__name__
     return log_amazon_api_call
