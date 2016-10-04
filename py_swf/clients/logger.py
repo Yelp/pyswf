@@ -110,7 +110,7 @@ boto_amazon_api_calls = _build_boto_amazon_api_call_list()
 boto_non_amazon_api_calls = [method for method in boto_available_methods if method not in boto_amazon_api_calls]
 
 
-def build_boto_client_with_api_call_logger(boto_client, logger=None, additional_log_info={}):
+def build_boto_client_with_api_call_logger(boto_client, logger=None, extra_log_info_dict={}):
     """
     It builds a boto_client wrapper BotoClientWithLogger that will log every call to amazon apis.
     A BotoClientWithLogger instance shares the same interface as original boto_client. At the same
@@ -141,7 +141,7 @@ def build_boto_client_with_api_call_logger(boto_client, logger=None, additional_
                 self.logger = logger
             self._set_logger_on_boto_client(extra_info)
 
-    return BotoClientWithLogger(boto_client, logger, additional_log_info)
+    return BotoClientWithLogger(boto_client, logger, extra_log_info_dict)
 
 
 def _add_logger_to_api_call(boto_func, logger, extra_info={}):
