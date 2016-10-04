@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import inspect
 
 DEFAULT_LOGGER_NAME = 'default_logger_for_amazon_api_calls'
 
@@ -78,6 +77,12 @@ boto_available_methods = [
 
 
 def _get_boto_method(api_name):
+    """
+    convert amazon api name into corresponding boto method
+    example:
+    api_name = 'StartWorkflowExecution'
+    return 'start_workflow_execution'
+    """
     method_name = ''
     seg = ''
     index = 0
@@ -95,55 +100,57 @@ def _get_boto_method(api_name):
     return method_name
 
 
-def build_boto_amazon_api_call_list():
+def _build_boto_amazon_api_call_list():
     boto_amazon_api_calls = []
     for api in amazon_api_list:
         boto_amazon_api_calls.append(_get_boto_method(api))
     return boto_amazon_api_calls
 
-boto_amazon_api_calls = build_boto_amazon_api_call_list()
+boto_amazon_api_calls = _build_boto_amazon_api_call_list()
 boto_non_amazon_api_calls = [method for method in boto_available_methods if method not in boto_amazon_api_calls]
 
 
-def build_boto_client_with_api_call_logger(boto_client, logger=None):
+def build_boto_client_with_api_call_logger(boto_client, logger=None, additional_log_info={}):
     """
-    build a boto_client wrapper class that will log every call to amazon apis. It will build a BotoClientWithLogger instance.
-    This instance share the same interface with boto_client, but will log calls to amazon apis using a decorator
+    It builds a boto_client wrapper BotoClientWithLogger that will log every call to amazon apis.
+    A BotoClientWithLogger instance shares the same interface as original boto_client. At the same
+    time BotoClientWithLogger will log calls to amazon apis using a decorator
     :param boto_client: a reference to boto_client
     :param logger: must be callable, assume user has already added timestamp to logger logic
+    :param additional_log_info: additional info to put in a log
     :return: a BotoClientWithLogger instance.
     """
     class BotoClientWithLogger(object):
-        def __init__(self, boto_client, logger=None):
+        def __init__(self, boto_client, logger=None, extra_info={}):
             self.boto_client = boto_client
             self.logger = logger or _build_default_logger()
-            self._set_logger_on_boto_client()
+            self._set_logger_on_boto_client(extra_info)
 
-        def _set_logger_on_boto_client(self):
-            # make BotoClientWithLogger shares the same interface as boto_client
+        def _set_logger_on_boto_client(self, extra_info={}):
+            # make BotoClientWithLogger share the same interface as boto_client
             # set logger on methods that calls amazon apis
             for method in boto_available_methods:
                 boto_func = getattr(self.boto_client, method)
                 if method in boto_amazon_api_calls:
-                    setattr(self, method, _add_logger_to_api_call(boto_func, self.logger))
+                    setattr(self, method, _add_logger_to_api_call(boto_func, self.logger, extra_info))
                 else:
                     setattr(self, method, boto_func)
 
-    return BotoClientWithLogger(boto_client, logger)
+        def update_logger_on_boto_client(self, logger=None, extra_info={}):
+            if logger:
+                self.logger = logger
+            self._set_logger_on_boto_client(extra_info)
+
+    return BotoClientWithLogger(boto_client, logger, additional_log_info)
 
 
-def _add_logger_to_api_call(boto_func, logger):
-    """
-    a decorator to log calls to amazon apis
-    :param boto_client: a reference to boto_client
-    :param func_name: name of method that calls amazon apis
-    :param logger: logger to log info, must be callable
-    :return: a callable object
-    """
+def _add_logger_to_api_call(boto_func, logger, extra_info={}):
+    """decorator to log calls to amazon api"""
     def log_amazon_api_call(*args, **kwargs):
-        logger(amazon_api_name=_get_api_name(boto_func.__name__))
+        extra_info['amazon_api_name'] = _get_api_name(boto_func.__name__)
+        logger(**extra_info)
         return boto_func(*args, **kwargs)
-    # set __wrapped__ for test to make sure it is actually decorated
+    # set __wrapped__ to the name of original method, used in test to make sure it is actually decorated
     log_amazon_api_call.__wrapped__ = boto_func.__name__
     return log_amazon_api_call
 
@@ -172,6 +179,3 @@ def _get_api_name(name):
     for seg in name.split('_'):
         translated_name += seg.capitalize()
     return translated_name
-
-
-
