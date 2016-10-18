@@ -26,8 +26,8 @@ setup(
     url='http://py-swf.readthedocs.io/en/latest/',
     packages=find_packages(exclude=['tests*', 'testing']),
     install_requires=[
-        'boto3==1.4.1',
-        'botocore==1.4.46',
+        'boto3',
+        'botocore>=1.3.24',
     ],
     zip_safe=False,
     keywords=['py_swf', 'swf', 'amazon', 'workflow'],
