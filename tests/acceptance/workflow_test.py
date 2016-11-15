@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import uuid
 
+from datetime import datetime
 import pytest
 import simplejson
 
@@ -112,3 +113,48 @@ def test_walk_execution_history(workflow_client, decision_client):
     decision_task = poll_decision_and_respond(decision_client)
     terminate_workflow(workflow_client, workflow_id)
     walk_execution_history(decision_client, workflow_id, decision_task.workflow_run_id)
+
+
+def test_count_open_workflow_by_time(workflow_client):
+    workflow_client.count_open_workflow_by_time(oldest_start_date=datetime(2016, 11, 11))
+    workflow_client.count_open_workflow_by_time(oldest_start_date=datetime(2016, 11, 11), latest_start_date=datetime(2016, 11, 12))
+
+
+def test_count_open_workflow_by_type(workflow_client):
+    workflow_client.count_open_workflow_by_type(name='workflow name')
+    workflow_client.count_open_workflow_by_type(name='workflow name', version='0.1')
+
+
+def test_count_open_workflow_by_tag(workflow_client):
+    workflow_client.count_open_workflow_by_tag(tag='tag')
+
+
+def test_count_open_workflow_by_id(workflow_client):
+    workflow_client.count_open_workflow_by_id(workflow_id=str(uuid.uuid4()))
+
+
+def test_count_closed_workflow_by_time(workflow_client):
+    workflow_client.count_closed_workflow_by_time(oldest_start_date=datetime(2016, 11, 11))
+    workflow_client.count_closed_workflow_by_time(oldest_start_date=datetime(2016, 11, 11),
+                                                  latest_start_date=datetime(2016, 11, 12))
+
+    workflow_client.count_closed_workflow_by_time(oldest_close_date=datetime(2016, 11, 11))
+    workflow_client.count_closed_workflow_by_time(oldest_close_date=datetime(2016, 11, 11),
+                                                  latest_close_date=datetime(2016, 11, 12))
+
+
+def test_count_closed_workflow_by_type(workflow_client):
+    workflow_client.count_closed_workflow_by_type(name='name')
+    workflow_client.count_closed_workflow_by_type(name='name', version='0.1')
+
+
+def test_count_closed_workflow_by_tag(workflow_client):
+    workflow_client.count_closed_workflow_by_tag(tag='tag')
+
+
+def test_count_closed_workflow_by_id(workflow_client):
+    workflow_client.count_closed_workflow_by_id(workflow_id=str(uuid.uuid4()))
+
+
+def test_count_closed_workflow_by_close_status(workflow_client):
+    workflow_client.count_closed_workflow_by_close_status(status='COMPLETED')
