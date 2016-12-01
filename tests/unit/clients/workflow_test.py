@@ -24,6 +24,56 @@ def workflow_client(workflow_config, boto_client):
     return WorkflowClient(workflow_config, boto_client)
 
 
+@pytest.fixture
+def oldest_start_date():
+    return datetime(2016, 11, 11)
+
+
+@pytest.fixture
+def latest_start_date():
+    return datetime(2016, 11, 12)
+
+
+@pytest.fixture
+def oldest_close_date():
+    return datetime(2016, 11, 28)
+
+
+@pytest.fixture
+def latest_close_date():
+    return datetime(2016, 11, 29)
+
+
+@pytest.fixture
+def start_time_filter_with_oldest_date(oldest_start_date):
+    return dict(startTimeFilter=dict(oldestDate=oldest_start_date))
+
+
+@pytest.fixture
+def start_time_filter_with_both_date(oldest_start_date, latest_start_date):
+    return dict(
+        startTimeFilter=dict(
+            oldestDate=oldest_start_date,
+            latestDate=latest_start_date,
+        )
+    )
+
+
+@pytest.fixture
+def close_time_filter_with_oldest_date(oldest_close_date):
+    return dict(closeTimeFilter=dict(oldestDate=oldest_close_date))
+
+
+@pytest.fixture
+def close_time_filter_with_both_date(oldest_close_date, latest_close_date):
+    return dict(
+        closeTimeFilter=dict(
+            oldestDate=oldest_close_date,
+            latestDate=latest_close_date,
+        )
+    )
+
+
 def test_start_workflow(workflow_config, workflow_client, boto_client):
     boto_return = mock.MagicMock()
     boto_client.start_workflow_execution.return_value = boto_return
@@ -62,27 +112,11 @@ def test_terminate_workflow(workflow_config, workflow_client, boto_client):
     )
 
 
-class AssertExceptionRaisedTestHelper(TestCase):
-    def assertion_exception_raised(self, exception_class, func, *args, **kwargs):
-        with self.assertRaises(exception_class):
-            return func(*args, **kwargs)
-
-    def assert_no_exception_raised(self, func, *args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            self.fail("unexpected exception {}".format(repr(e)))
-
-    # unittest.TestCase requires runTest()
-    def runTest(self):
-        pass
-
-
-def test_build_time_filter_dict():
+def test_build_time_filter_dict(oldest_start_date, latest_start_date):
     time_filter_dict = _build_time_filter_dict()
     assert time_filter_dict is None
 
-    start_date = datetime(2016, 11, 11)
+    start_date = oldest_start_date
     time_filter_dict = _build_time_filter_dict(oldest_start_date=start_date)
     assert 'startTimeFilter' in time_filter_dict
     assert time_filter_dict['startTimeFilter'] == {'oldestDate': start_date}
@@ -91,7 +125,7 @@ def test_build_time_filter_dict():
     assert 'closeTimeFilter' in time_filter_dict
     assert time_filter_dict['closeTimeFilter'] == {'oldestDate': start_date}
 
-    end_date = datetime(2017, 11, 11)
+    end_date = latest_start_date
     time_filter_dict = _build_time_filter_dict(oldest_start_date=start_date, latest_start_date=end_date)
     assert 'startTimeFilter' in time_filter_dict
     assert time_filter_dict['startTimeFilter'] == {'oldestDate': start_date, 'latestDate': end_date}
@@ -100,20 +134,11 @@ def test_build_time_filter_dict():
     assert 'closeTimeFilter' in time_filter_dict
     assert time_filter_dict['closeTimeFilter'] == {'oldestDate': start_date, 'latestDate': end_date}
 
-    test_helper = AssertExceptionRaisedTestHelper()
-    assert_invalid_datetime_query = functools.partial(
-        test_helper.assertion_exception_raised,
-        exception_class=InvalidQueryToCountWorkflow,
-        func=_build_time_filter_dict,
-    )
-    assert_invalid_datetime_query(oldest_start_date=start_date, oldest_close_date=start_date)
 
-
-def test_count_open_workflow_executions(workflow_config, workflow_client, boto_client):
+def test_count_open_workflow_executions(workflow_config, workflow_client, boto_client, oldest_start_date):
     workflow_client._count_open_workflow_executions()
     _assert_count_open_workflow_executions_called_with(boto_client, workflow_config)
 
-    oldest_start_date = datetime(2016, 11, 11)
     time_filter_dict = _build_time_filter_dict(oldest_start_date=oldest_start_date)
     workflow_client._count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
@@ -137,9 +162,7 @@ def test_count_open_workflow_executions(workflow_config, workflow_client, boto_c
     )
 
 
-def test_count_closed_workflow_executions(workflow_config, workflow_client, boto_client):
-    oldest_start_date = datetime(2016, 11, 11)
-    oldest_close_date = oldest_start_date
+def test_count_closed_workflow_executions(workflow_config, workflow_client, boto_client, oldest_start_date, oldest_close_date):
     start_time_filter_dict = _build_time_filter_dict(oldest_start_date=oldest_start_date)
     close_time_filter_dict = _build_time_filter_dict(oldest_close_date=oldest_close_date)
     workflow_filter_dict = {'test_filter': {'key': 'value'}}
@@ -176,21 +199,6 @@ def test_count_closed_workflow_executions(workflow_config, workflow_client, boto
     )
 
 
-def test_count_open_workflow_by_time(boto_client, workflow_client, workflow_config):
-    oldest_start_date = datetime(2016, 11, 11)
-    workflow_client.count_open_workflow_by_time(oldest_start_date=oldest_start_date)
-    time_dict = dict(oldestDate=oldest_start_date)
-    _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, startTimeFilter=time_dict)
-
-    latest_start_date = datetime(2016, 11, 24)
-    workflow_client.count_open_workflow_by_time(
-        oldest_start_date=oldest_start_date,
-        latest_start_date=latest_start_date,
-    )
-    time_dict = dict(oldestDate=oldest_start_date, latestDate=latest_start_date)
-    _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, startTimeFilter=time_dict)
-
-
 def _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, **kwargs):
     _assert_boto_method_called_with(boto_client.count_open_workflow_executions, workflow_config.domain, **kwargs)
 
@@ -206,129 +214,446 @@ def _assert_boto_method_called_with(boto_method, domain, **kwargs):
     )
 
 
-def test_count_open_workflow_by_type(boto_client, workflow_client, workflow_config):
-    name = 'test'
-    version = 'test version'
-    workflow_client.count_open_workflow_by_type(name=name)
-    _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, typeFilter=dict(name=name))
+def _count_open_workflow_test_helper(boto_client, workflow_config, test_method, test_kwargs_list):
+    for kwargs_tuple in test_kwargs_list:
+        test_kwargs, expected_kwargs = kwargs_tuple
+        test_method(**test_kwargs)
+        _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, **expected_kwargs)
 
-    workflow_client.count_open_workflow_by_type(name=name, version=version)
-    _assert_count_open_workflow_executions_called_with(
+
+@pytest.fixture
+def count_by_start_time_kwarg_list(
+        oldest_start_date,
+        latest_start_date,
+        start_time_filter_with_oldest_date,
+        start_time_filter_with_both_date
+):
+    return [
+        (dict(oldest_start_date=oldest_start_date), start_time_filter_with_oldest_date),
+        (dict(oldest_start_date=oldest_start_date, latest_start_date=latest_start_date), start_time_filter_with_both_date),
+    ]
+
+
+def test_count_open_workflow_by_start_time(boto_client, workflow_client, workflow_config, count_by_start_time_kwarg_list):
+    _count_open_workflow_test_helper(
         boto_client,
         workflow_config,
-        typeFilter=dict(name=name, version=version),
+        workflow_client.count_open_workflow_by_start_time,
+        count_by_start_time_kwarg_list
     )
 
 
-def test_count_open_workflow_by_tag(boto_client, workflow_client, workflow_config):
-    tag = 'test tag'
-    workflow_client.count_open_workflow_by_tag(tag=tag)
-    _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, tagFilter=dict(tag=tag))
+@pytest.fixture
+def count_by_type_kwarg_list():
+    return [
+        (dict(name='test'), dict(typeFilter=dict(name='test'))),
+        (dict(name='test', version='test version'), dict(typeFilter=dict(name='test', version='test version'))),
+    ]
 
 
-def test_count_open_workflow_by_id(boto_client, workflow_client, workflow_config):
-    workflow_id = 'test'
-    workflow_client.count_open_workflow_by_id(workflow_id=workflow_id)
-    _assert_count_open_workflow_executions_called_with(
+def test_count_open_workflow_by_type(boto_client, workflow_client, workflow_config, count_by_type_kwarg_list):
+    _count_open_workflow_test_helper(
         boto_client,
         workflow_config,
-        executionFilter=dict(workflowId=workflow_id),
+        workflow_client.count_open_workflow_by_type,
+        count_by_type_kwarg_list
     )
 
 
-def test_count_closed_workflow_by_time(boto_client, workflow_client, workflow_config):
-    oldest_start_date = datetime(2016, 11, 11)
-    latest_start_date = datetime(2016, 11, 24)
-    oldest_close_date = datetime(2016, 12, 11)
-    latest_close_date = datetime(2016, 12, 24)
-
-    workflow_client.count_closed_workflow_by_time(oldest_start_date=oldest_start_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        startTimeFilter=dict(oldestDate=oldest_start_date),
-    )
-
-    workflow_client.count_closed_workflow_by_time(
-        oldest_start_date=oldest_start_date,
-        latest_start_date=latest_start_date,
-    )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        startTimeFilter=dict(oldestDate=oldest_start_date, latestDate=latest_start_date),
-    )
-
-    workflow_client.count_closed_workflow_by_time(oldest_close_date=oldest_close_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        closeTimeFilter=dict(oldestDate=oldest_close_date),
-    )
-
-    workflow_client.count_closed_workflow_by_time(
-        oldest_close_date=oldest_close_date,
-        latest_close_date=latest_close_date,
-    )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        closeTimeFilter=dict(oldestDate=oldest_close_date, latestDate=latest_close_date),
-    )
-
-    test_helper = AssertExceptionRaisedTestHelper()
-    assert_pass_mutally_exclusive_date = functools.partial(
-        test_helper.assertion_exception_raised,
-        exception_class=InvalidQueryToCountWorkflow,
-        func=workflow_client.count_closed_workflow_by_time,
-    )
-    assert_pass_mutally_exclusive_date(oldest_start_date=oldest_start_date, oldest_close_date=oldest_close_date)
-
-
-def test_count_closed_workflow_by_type(boto_client, workflow_client, workflow_config):
-    name = 'test'
-    version = 'test version'
-    workflow_client.count_closed_workflow_by_type(name=name)
-    _assert_count_closed_workflow_executions_called_with(boto_client, workflow_config, typeFilter=dict(name=name))
-
-    workflow_client.count_closed_workflow_by_type(name=name, version=version)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        typeFilter=dict(name=name, version=version),
-    )
-
-
-def test_count_closed_workflow_by_tag(boto_client, workflow_client, workflow_config):
-    tag = 'test tag'
-    workflow_client.count_closed_workflow_by_tag(tag=tag)
-    _assert_count_closed_workflow_executions_called_with(boto_client, workflow_config, tagFilter=dict(tag=tag))
-
-
-def test_count_closed_workflow_by_id(boto_client, workflow_client, workflow_config):
-    workflow_id = 'test'
-    workflow_client.count_closed_workflow_by_id(workflow_id=workflow_id)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        executionFilter=dict(workflowId=workflow_id),
-    )
-
-
-def test_count_closed_workflow_by_close_status(boto_client, workflow_client, workflow_config):
-    valid_status = set(['COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT'])
-    for status in valid_status:
-        workflow_client.count_closed_workflow_by_close_status(status)
-        _assert_count_closed_workflow_executions_called_with(
-            boto_client,
-            workflow_config,
-            closeStatusFilter=dict(status=status),
+@pytest.fixture
+def count_by_type_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
+    return [
+        (
+            dict(name='test', version='test version', oldest_start_date=oldest_start_date),
+            dict(typeFilter=dict(name='test', version='test version'), **start_time_filter_with_oldest_date)
         )
+    ]
 
+
+def test_count_open_workflow_by_type_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_type_and_start_time_kwarg_list
+):
+    _count_open_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_open_workflow_by_type_and_start_time,
+        count_by_type_and_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_tag_kwarg_list():
+    return [
+        (dict(tag='test'), dict(tagFilter=dict(tag='test'))),
+    ]
+
+
+def test_count_open_workflow_by_tag(boto_client, workflow_client, workflow_config, count_by_tag_kwarg_list):
+    _count_open_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_open_workflow_by_tag,
+        count_by_tag_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_tag_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
+    return [
+        (
+            dict(tag='test', oldest_start_date=oldest_start_date),
+            dict(tagFilter=dict(tag='test'), **start_time_filter_with_oldest_date)
+        )
+    ]
+
+
+def test_count_open_workflow_by_tag_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_tag_and_start_time_kwarg_list
+):
+    _count_open_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_open_workflow_by_tag_and_start_time,
+        count_by_tag_and_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_id_kwarg_list():
+    return [
+        (dict(workflow_id='test'), dict(executionFilter=dict(workflowId='test')))
+    ]
+
+
+def test_count_open_workflow_by_id(boto_client, workflow_client, workflow_config, count_by_id_kwarg_list):
+    _count_open_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_open_workflow_by_id,
+        count_by_id_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_id_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
+    return [
+        (
+            dict(workflow_id='test', oldest_start_date=oldest_start_date),
+            dict(executionFilter=dict(workflowId='test'), **start_time_filter_with_oldest_date)
+        ),
+    ]
+
+
+def test_count_open_workflow_by_id_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_id_and_start_time_kwarg_list
+):
+    _count_open_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_open_workflow_by_id_and_start_time,
+        count_by_id_and_start_time_kwarg_list
+    )
+
+
+def _count_closed_workflow_test_helper(boto_client, workflow_config, test_method, test_kwargs_list):
+    for kwargs_tuple in test_kwargs_list:
+        test_kwargs, expected_kwargs = kwargs_tuple
+        test_method(**test_kwargs)
+        _assert_count_closed_workflow_executions_called_with(boto_client, workflow_config, **expected_kwargs)
+
+
+def test_count_closed_workflow_by_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_start_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_start_time,
+        count_by_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_close_time_kwarg_list(
+        oldest_close_date,
+        latest_close_date,
+        close_time_filter_with_oldest_date,
+        close_time_filter_with_both_date
+):
+    return [
+        (dict(oldest_close_date=oldest_close_date), close_time_filter_with_oldest_date),
+        (dict(oldest_close_date=oldest_close_date, latest_close_date=latest_close_date), close_time_filter_with_both_date),
+    ]
+
+
+def test_count_closed_workflow_by_close_time(boto_client, workflow_client, workflow_config, count_by_close_time_kwarg_list):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_close_time,
+        count_by_close_time_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_type(boto_client, workflow_client, workflow_config, count_by_type_kwarg_list):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_type,
+        count_by_type_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_type_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_type_and_start_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_type_and_start_time,
+        count_by_type_and_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_type_and_close_time_kwarg_list(oldest_close_date, close_time_filter_with_oldest_date):
+    return [
+        (
+            dict(name='test', version='test version', oldest_close_date=oldest_close_date),
+            dict(typeFilter=dict(name='test', version='test version'), **close_time_filter_with_oldest_date)
+        )
+    ]
+
+
+def test_count_closed_workflow_by_type_and_close_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_type_and_close_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_type_and_close_time,
+        count_by_type_and_close_time_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_tag(boto_client, workflow_client, workflow_config, count_by_tag_kwarg_list):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_tag,
+        count_by_tag_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_tag_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_tag_and_start_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_tag_and_start_time,
+        count_by_tag_and_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_tag_and_close_time_kwarg_list(oldest_close_date, close_time_filter_with_oldest_date):
+    return [
+        (
+            dict(tag='test', oldest_close_date=oldest_close_date),
+            dict(tagFilter=dict(tag='test'), **close_time_filter_with_oldest_date)
+        )
+    ]
+
+
+def test_count_closed_workflow_by_tag_and_close_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_tag_and_close_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_tag_and_close_time,
+        count_by_tag_and_close_time_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_id(boto_client, workflow_client, workflow_config, count_by_id_kwarg_list):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_id,
+        count_by_id_kwarg_list
+    )
+
+
+def test_count_closed_workflow_by_id_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_id_and_start_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_id_and_start_time,
+        count_by_id_and_start_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_id_and_close_time_kwarg_list(oldest_close_date, close_time_filter_with_oldest_date):
+    return [
+        (
+            dict(workflow_id='test', oldest_close_date=oldest_close_date),
+            dict(executionFilter=dict(workflowId='test'), **close_time_filter_with_oldest_date)
+        )
+    ]
+
+
+def test_count_closed_workflow_by_id_and_close_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_id_and_close_time_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_id_and_close_time,
+        count_by_id_and_close_time_kwarg_list
+    )
+
+
+@pytest.fixture
+def count_by_close_status_kwarg_list(
+        oldest_start_date=None,
+        start_time_filter_with_oldest_date=None,
+        oldest_close_date=None,
+        close_time_filter_with_oldest_date=None
+):
+    valid_status = set(['COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT'])
+    kwarg_list = []
+    for status in valid_status:
+        test_kwarg = dict(status=status)
+        expected_kwarg = dict(closeStatusFilter=dict(status=status))
+        if oldest_start_date:
+            test_kwarg['oldest_start_date'] = oldest_start_date
+            expected_kwarg.update(start_time_filter_with_oldest_date)
+        elif oldest_close_date:
+            test_kwarg['oldest_close_date'] = oldest_close_date
+            expected_kwarg.update(close_time_filter_with_oldest_date)
+        kwarg_list.append((test_kwarg, expected_kwarg))
+    return kwarg_list
+
+
+class AssertExceptionRaisedTestHelper(TestCase):
+    def assertion_exception_raised(self, exception_class, func, *args, **kwargs):
+        with self.assertRaises(exception_class):
+            return func(*args, **kwargs)
+
+    def assert_no_exception_raised(self, func, *args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            self.fail("unexpected exception {}".format(repr(e)))
+
+    # unittest.TestCase requires runTest()
+    def runTest(self):
+        pass
+
+
+def _invalid_state_test(func, **kwargs):
     test_helper = AssertExceptionRaisedTestHelper()
     assert_invalid_close_state = functools.partial(
         test_helper.assertion_exception_raised,
         exception_class=InvalidQueryToCountWorkflow,
-        func=workflow_client.count_closed_workflow_by_close_status,
+        func=func,
     )
-    assert_invalid_close_state(status='invalid status')
+    assert_invalid_close_state(status='invalid status', **kwargs)
+
+
+def test_count_closed_workflow_by_close_status(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_close_status_kwarg_list
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_close_status,
+        count_by_close_status_kwarg_list
+    )
+    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status)
+
+
+@pytest.fixture
+def count_by_close_status_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
+    return count_by_close_status_kwarg_list(
+        oldest_start_date=oldest_start_date,
+        start_time_filter_with_oldest_date=start_time_filter_with_oldest_date
+    )
+
+
+def test_count_closed_workflow_by_close_status_and_start_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_close_status_and_start_time_kwarg_list,
+        oldest_start_date
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_close_status_and_start_time,
+        count_by_close_status_and_start_time_kwarg_list
+    )
+    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status_and_start_time, oldest_start_date=oldest_start_date)
+
+
+@pytest.fixture
+def count_by_close_status_and_close_time_kwarg_list(oldest_close_date, close_time_filter_with_oldest_date):
+    return count_by_close_status_kwarg_list(
+        oldest_close_date=oldest_close_date,
+        close_time_filter_with_oldest_date=close_time_filter_with_oldest_date
+    )
+
+
+def test_count_closed_workflow_by_close_status_and_close_time(
+        boto_client,
+        workflow_client,
+        workflow_config,
+        count_by_close_status_and_close_time_kwarg_list,
+        oldest_close_date
+):
+    _count_closed_workflow_test_helper(
+        boto_client,
+        workflow_config,
+        workflow_client.count_closed_workflow_by_close_status_and_close_time,
+        count_by_close_status_and_close_time_kwarg_list
+    )
+    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status_and_close_time, oldest_close_date=oldest_close_date)
