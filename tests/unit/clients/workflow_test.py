@@ -244,23 +244,6 @@ def test_count_open_workflow_by_start_time(boto_client, workflow_client, workflo
 
 
 @pytest.fixture
-def count_by_type_kwarg_list():
-    return [
-        (dict(name='test'), dict(typeFilter=dict(name='test'))),
-        (dict(name='test', version='test version'), dict(typeFilter=dict(name='test', version='test version'))),
-    ]
-
-
-def test_count_open_workflow_by_type(boto_client, workflow_client, workflow_config, count_by_type_kwarg_list):
-    _count_open_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_open_workflow_by_type,
-        count_by_type_kwarg_list
-    )
-
-
-@pytest.fixture
 def count_by_type_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
     return [
         (
@@ -285,22 +268,6 @@ def test_count_open_workflow_by_type_and_start_time(
 
 
 @pytest.fixture
-def count_by_tag_kwarg_list():
-    return [
-        (dict(tag='test'), dict(tagFilter=dict(tag='test'))),
-    ]
-
-
-def test_count_open_workflow_by_tag(boto_client, workflow_client, workflow_config, count_by_tag_kwarg_list):
-    _count_open_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_open_workflow_by_tag,
-        count_by_tag_kwarg_list
-    )
-
-
-@pytest.fixture
 def count_by_tag_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
     return [
         (
@@ -321,22 +288,6 @@ def test_count_open_workflow_by_tag_and_start_time(
         workflow_config,
         workflow_client.count_open_workflow_by_tag_and_start_time,
         count_by_tag_and_start_time_kwarg_list
-    )
-
-
-@pytest.fixture
-def count_by_id_kwarg_list():
-    return [
-        (dict(workflow_id='test'), dict(executionFilter=dict(workflowId='test')))
-    ]
-
-
-def test_count_open_workflow_by_id(boto_client, workflow_client, workflow_config, count_by_id_kwarg_list):
-    _count_open_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_open_workflow_by_id,
-        count_by_id_kwarg_list
     )
 
 
@@ -407,15 +358,6 @@ def test_count_closed_workflow_by_close_time(boto_client, workflow_client, workf
     )
 
 
-def test_count_closed_workflow_by_type(boto_client, workflow_client, workflow_config, count_by_type_kwarg_list):
-    _count_closed_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_closed_workflow_by_type,
-        count_by_type_kwarg_list
-    )
-
-
 def test_count_closed_workflow_by_type_and_start_time(
         boto_client,
         workflow_client,
@@ -454,15 +396,6 @@ def test_count_closed_workflow_by_type_and_close_time(
     )
 
 
-def test_count_closed_workflow_by_tag(boto_client, workflow_client, workflow_config, count_by_tag_kwarg_list):
-    _count_closed_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_closed_workflow_by_tag,
-        count_by_tag_kwarg_list
-    )
-
-
 def test_count_closed_workflow_by_tag_and_start_time(
         boto_client,
         workflow_client,
@@ -498,15 +431,6 @@ def test_count_closed_workflow_by_tag_and_close_time(
         workflow_config,
         workflow_client.count_closed_workflow_by_tag_and_close_time,
         count_by_tag_and_close_time_kwarg_list
-    )
-
-
-def test_count_closed_workflow_by_id(boto_client, workflow_client, workflow_config, count_by_id_kwarg_list):
-    _count_closed_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_closed_workflow_by_id,
-        count_by_id_kwarg_list
     )
 
 
@@ -594,21 +518,6 @@ def _invalid_state_test(func, **kwargs):
         func=func,
     )
     assert_invalid_close_state(status='invalid status', **kwargs)
-
-
-def test_count_closed_workflow_by_close_status(
-        boto_client,
-        workflow_client,
-        workflow_config,
-        count_by_close_status_kwarg_list
-):
-    _count_closed_workflow_test_helper(
-        boto_client,
-        workflow_config,
-        workflow_client.count_closed_workflow_by_close_status,
-        count_by_close_status_kwarg_list
-    )
-    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status)
 
 
 @pytest.fixture

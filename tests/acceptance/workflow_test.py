@@ -123,11 +123,6 @@ def test_count_open_workflow_by_start_time(workflow_client):
     )
 
 
-def test_count_open_workflow_by_type(workflow_client):
-    workflow_client.count_open_workflow_by_type(name='workflow name')
-    workflow_client.count_open_workflow_by_type(name='workflow name', version='0.1')
-
-
 def test_count_open_workflow_by_type_and_start_time(workflow_client):
     workflow_client.count_open_workflow_by_type_and_start_time(
         name='workflow name',
@@ -135,16 +130,8 @@ def test_count_open_workflow_by_type_and_start_time(workflow_client):
     )
 
 
-def test_count_open_workflow_by_tag(workflow_client):
-    workflow_client.count_open_workflow_by_tag(tag='tag')
-
-
 def test_count_open_workflow_by_tag_and_start_time(workflow_client):
     workflow_client.count_open_workflow_by_tag_and_start_time(tag='tag', oldest_start_date=datetime(2016, 11, 11))
-
-
-def test_count_open_workflow_by_id(workflow_client):
-    workflow_client.count_open_workflow_by_id(workflow_id=str(uuid.uuid4()))
 
 
 def test_count_open_workflow_by_id_and_start_time(workflow_client):
@@ -170,11 +157,6 @@ def test_count_closed_workflow_by_close_time(workflow_client):
     )
 
 
-def test_count_closed_workflow_by_type(workflow_client):
-    workflow_client.count_closed_workflow_by_type(name='name')
-    workflow_client.count_closed_workflow_by_type(name='name', version='0.1')
-
-
 def test_count_closed_workflow_by_type_and_start_time(workflow_client):
     workflow_client.count_closed_workflow_by_type_and_start_time(name='name', oldest_start_date=datetime(2016, 11, 11))
     workflow_client.count_closed_workflow_by_type_and_start_time(
@@ -195,10 +177,6 @@ def test_count_closed_workflow_by_type_and_close_time(workflow_client):
     )
 
 
-def test_count_closed_workflow_by_tag(workflow_client):
-    workflow_client.count_closed_workflow_by_tag(tag='tag')
-
-
 def test_count_closed_workflow_by_tag_and_start_time(workflow_client):
     workflow_client.count_closed_workflow_by_tag(
         tag='tag',
@@ -215,10 +193,6 @@ def test_count_closed_workflow_by_tag_and_close_time(workflow_client):
     )
 
 
-def test_count_closed_workflow_by_id(workflow_client):
-    workflow_client.count_closed_workflow_by_id(workflow_id=str(uuid.uuid4()))
-
-
 def test_count_closed_workflow_by_id_and_start_time(workflow_client):
     workflow_client.count_closed_workflow_by_id(
         workflow_id=str(uuid.uuid4()),
@@ -233,10 +207,6 @@ def test_count_closed_workflow_by_id_and_close_time(workflow_client):
         oldest_close_date=datetime(2016, 11, 11),
         latest_close_date=datetime(2016, 11, 12),
     )
-
-
-def test_count_closed_workflow_by_close_status(workflow_client):
-    workflow_client.count_closed_workflow_by_close_status(status='COMPLETED')
 
 
 def test_count_closed_workflow_by_close_status_and_start_time(workflow_client):
