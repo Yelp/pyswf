@@ -2,15 +2,12 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import functools
 import mock
 import pytest
 
 from datetime import datetime
-from unittest import TestCase
 
 from py_swf.clients.workflow import _build_time_filter_dict
-from py_swf.clients.workflow import InvalidQueryToCountWorkflow
 from py_swf.clients.workflow import WorkflowClient
 
 
@@ -494,32 +491,6 @@ def count_by_close_status_kwarg_list(
     return kwarg_list
 
 
-class AssertExceptionRaisedTestHelper(TestCase):
-    def assertion_exception_raised(self, exception_class, func, *args, **kwargs):
-        with self.assertRaises(exception_class):
-            return func(*args, **kwargs)
-
-    def assert_no_exception_raised(self, func, *args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            self.fail("unexpected exception {}".format(repr(e)))
-
-    # unittest.TestCase requires runTest()
-    def runTest(self):
-        pass
-
-
-def _invalid_state_test(func, **kwargs):
-    test_helper = AssertExceptionRaisedTestHelper()
-    assert_invalid_close_state = functools.partial(
-        test_helper.assertion_exception_raised,
-        exception_class=InvalidQueryToCountWorkflow,
-        func=func,
-    )
-    assert_invalid_close_state(status='invalid status', **kwargs)
-
-
 @pytest.fixture
 def count_by_close_status_and_start_time_kwarg_list(oldest_start_date, start_time_filter_with_oldest_date):
     return count_by_close_status_kwarg_list(
@@ -533,7 +504,6 @@ def test_count_closed_workflow_by_close_status_and_start_time(
         workflow_client,
         workflow_config,
         count_by_close_status_and_start_time_kwarg_list,
-        oldest_start_date
 ):
     _count_closed_workflow_test_helper(
         boto_client,
@@ -541,7 +511,6 @@ def test_count_closed_workflow_by_close_status_and_start_time(
         workflow_client.count_closed_workflow_by_close_status_and_start_time,
         count_by_close_status_and_start_time_kwarg_list
     )
-    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status_and_start_time, oldest_start_date=oldest_start_date)
 
 
 @pytest.fixture
@@ -557,7 +526,6 @@ def test_count_closed_workflow_by_close_status_and_close_time(
         workflow_client,
         workflow_config,
         count_by_close_status_and_close_time_kwarg_list,
-        oldest_close_date
 ):
     _count_closed_workflow_test_helper(
         boto_client,
@@ -565,4 +533,3 @@ def test_count_closed_workflow_by_close_status_and_close_time(
         workflow_client.count_closed_workflow_by_close_status_and_close_time,
         count_by_close_status_and_close_time_kwarg_list
     )
-    _invalid_state_test(workflow_client.count_closed_workflow_by_close_status_and_close_time, oldest_close_date=oldest_close_date)

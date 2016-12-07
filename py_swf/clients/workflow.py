@@ -6,10 +6,6 @@ from __future__ import unicode_literals
 __all__ = ['WorkflowClient']
 
 
-class InvalidQueryToCountWorkflow(Exception):
-    pass
-
-
 class WorkflowClient(object):
     """A client that provides a pythonic API for starting and terminating workflows through an SWF boto3 client.
 
@@ -247,6 +243,7 @@ class WorkflowClient(object):
     def count_closed_workflow_by_close_status_and_start_time(self, status, oldest_start_date, latest_start_date=None):
         """
         only workflow executions that match this close status and start time criteria are counted.
+        valid status are ('COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT')
         This filter has an affect only if executionStatus is specified as CLOSED
         :param status: string
         :param oldest_start_date: datetime
@@ -263,6 +260,7 @@ class WorkflowClient(object):
     def count_closed_workflow_by_close_status_and_close_time(self, status, oldest_close_date, latest_close_date=None):
         """
         only workflow executions that match this close status and close time criteria are counted.
+        valid status are ('COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT')
         This filter has an affect only if executionStatus is specified as CLOSED
         :param status: string
         :param oldest_close_date: datetime
@@ -403,13 +401,8 @@ def _build_tag_filter_dict(tag):
 
 
 def _build_execution_filter_dict(workflow_id):
-    filter_dict = {'workflowId': workflow_id}
-    return {'executionFilter': filter_dict}
+    return {'executionFilter': {'workflowId': workflow_id}}
 
 
 def _build_close_status_filter_dict(status):
-    valid_status = set(['COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT'])
-    if status not in valid_status:
-        raise InvalidQueryToCountWorkflow("Invalid workflow close status!")
-    filter_dict = {'status': status}
-    return {'closeStatusFilter': filter_dict}
+    return {'closeStatusFilter': {'status': status}}
