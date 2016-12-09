@@ -115,6 +115,74 @@ def test_walk_execution_history(workflow_client, decision_client):
     walk_execution_history(decision_client, workflow_id, decision_task.workflow_run_id)
 
 
+def test_count_open_workflow_executions(workflow_client):
+    workflow_client.count_open_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+    )
+
+    workflow_client.count_open_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        latest_start_date=datetime(2016, 11, 12),
+    )
+
+    workflow_client.count_open_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        workflow_id=str(uuid.uuid4()),
+    )
+
+    workflow_client.count_open_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        workflow_name='workflow',
+        version='1.0'
+    )
+
+    workflow_client.count_open_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        tag='tag'
+    )
+
+
+def test_count_closed_workflow_exectuions(workflow_client):
+    workflow_client.count_closed_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        latest_start_date=datetime(2016, 11, 12),
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_close_date=datetime(2016, 11, 12),
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_close_date=datetime(2016, 11, 12),
+        latest_close_date=datetime(2016, 11, 13),
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        workflow_name='workflow',
+        version='1.0'
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_close_date=datetime(2016, 11, 11),
+        tag='tag',
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        workflow_id=str(uuid.uuid4()),
+    )
+
+    workflow_client.count_closed_workflow_executions(
+        oldest_start_date=datetime(2016, 11, 11),
+        close_status='COMPLETED',
+    )
+
+
 def test_count_open_workflow_by_start_time(workflow_client):
     workflow_client.count_open_workflow_by_start_time(oldest_start_date=datetime(2016, 11, 11))
     workflow_client.count_open_workflow_by_start_time(
