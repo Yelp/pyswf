@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from functools import partial
 
 __all__ = ['WorkflowClient']
 
@@ -66,296 +67,113 @@ class WorkflowClient(object):
             reason=reason,
         )
 
-    def count_open_workflow_by_start_time(self, oldest_start_date, latest_start_date=None):
-        """
-        only workflow executions that meet start time criteria will be counted.
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: number of open workflows within time range
-        """
-        return self._count_open_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-        )
-
-    def count_open_workflow_by_type_and_start_time(self, name, oldest_start_date, latest_start_date=None, version=None):
-        """
-        only workflow have the desired type and start time criteria will be counted.
-        :param name: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :param version: string
-        :return: total number of open workflows that met the filter criteria
-        """
-        type_filter_dict = _build_type_filter_dict(name, version)
-        return self._count_open_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=type_filter_dict,
-        )
-
-    def count_open_workflow_by_tag_and_start_time(self, tag, oldest_start_date, latest_start_date=None):
-        """
-        only executions that have a tag that matches the filter and start time criteria are counted.
-        :param tag: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of open workflows that met the filter criteria
-        """
-        tag_filter_dict = _build_tag_filter_dict(tag)
-        return self._count_open_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=tag_filter_dict,
-        )
-
-    def count_open_workflow_by_id_and_start_time(self, workflow_id, oldest_start_date, latest_start_date=None):
-        """
-        only workflow executions matching the WorkflowId in the filter and start time criteria are counted.
-        :param workflow_id: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of open workflows that met the filter criteria
-        """
-        execution_filter_dict = _build_execution_filter_dict(workflow_id)
-        return self._count_open_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=execution_filter_dict,
-        )
-
-    def count_closed_workflow_by_start_time(self, oldest_start_date, latest_start_date=None):
-        """
-        only workflow executions that meet the start time criteria of the filter are counted.
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        return self._count_closed_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-        )
-
-    def count_closed_workflow_by_close_time(self, oldest_close_date, latest_close_date=None):
-        """
-        only workflow executions that meet the close time criteria of the filter are counted.
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        return self._count_closed_workflow_executions(
-            oldest_close_date=oldest_close_date,
-            latest_close_date=latest_close_date,
-        )
-
-    def count_closed_workflow_by_type_and_start_time(self, name, oldest_start_date, latest_start_date=None, version=None):
-        """
-        only workflow executions that meet the type criteria and start time criteria are counted
-        :param name: string
-        :param version: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        type_filter_dict = _build_type_filter_dict(name, version)
-        return self._count_closed_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=type_filter_dict,
-        )
-
-    def count_closed_workflow_by_type_and_close_time(self, name, oldest_close_date, latest_close_date=None, version=None):
-        """
-        only workflow executions that meet the type criteria and close time criteria are counted
-        :param name: string
-        :param version: string
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        type_filter_dict = _build_type_filter_dict(name, version)
-        return self._count_closed_workflow_executions(
-            oldest_close_date=oldest_close_date,
-            latest_close_date=latest_close_date,
-            workflow_filter_dict=type_filter_dict,
-        )
-
-    def count_closed_workflow_by_tag_and_start_time(self, tag, oldest_start_date, latest_start_date=None):
-        """
-        only executions that have a tag that matches the filter and meet start time criteria are counted.
-        :param tag: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        tag_filter_dict = _build_tag_filter_dict(tag)
-        return self._count_closed_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=tag_filter_dict,
-        )
-
-    def count_closed_workflow_by_tag_and_close_time(self, tag, oldest_close_date, latest_close_date=None):
-        """
-        only executions that have a tag that matches the filter and meet close time criteria are counted.
-        :param tag: string
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        tag_filter_dict = _build_tag_filter_dict(tag)
-        return self._count_closed_workflow_executions(
-            oldest_close_date=oldest_close_date,
-            latest_close_date=latest_close_date,
-            workflow_filter_dict=tag_filter_dict,
-        )
-
-    def count_closed_workflow_by_id_and_start_time(self, workflow_id, oldest_start_date, latest_start_date=None):
-        """
-        only workflow executions matching the WorkflowId in the filter and meet start time criteria are counted.
-        :param workflow_id: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        execution_filter_dict = _build_execution_filter_dict(workflow_id)
-        return self._count_closed_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=execution_filter_dict,
-        )
-
-    def count_closed_workflow_by_id_and_close_time(self, workflow_id, oldest_close_date, latest_close_date=None):
-        """
-        only workflow executions matching the WorkflowId in the filter and meet close time criteria are counted.
-        :param workflow_id: string
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        execution_filter_dict = _build_execution_filter_dict(workflow_id)
-        return self._count_closed_workflow_executions(
-            oldest_close_date=oldest_close_date,
-            latest_close_date=latest_close_date,
-            workflow_filter_dict=execution_filter_dict,
-        )
-
-    def count_closed_workflow_by_close_status_and_start_time(self, status, oldest_start_date, latest_start_date=None):
-        """
-        only workflow executions that match this close status and start time criteria are counted.
-        valid status are ('COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT')
-        This filter has an affect only if executionStatus is specified as CLOSED
-        :param status: string
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        close_status_filter_dict = _build_close_status_filter_dict(status)
-        return self._count_closed_workflow_executions(
-            oldest_start_date=oldest_start_date,
-            latest_start_date=latest_start_date,
-            workflow_filter_dict=close_status_filter_dict,
-        )
-
-    def count_closed_workflow_by_close_status_and_close_time(self, status, oldest_close_date, latest_close_date=None):
-        """
-        only workflow executions that match this close status and close time criteria are counted.
-        valid status are ('COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT')
-        This filter has an affect only if executionStatus is specified as CLOSED
-        :param status: string
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :return: total number of closed workflows that met the filter criteria
-        """
-        close_status_filter_dict = _build_close_status_filter_dict(status)
-        return self._count_closed_workflow_executions(
-            oldest_close_date=oldest_close_date,
-            latest_close_date=latest_close_date,
-            workflow_filter_dict=close_status_filter_dict,
-        )
-
-    def _count_open_workflow_executions(
+    def count_open_workflow_executions(
             self,
-            oldest_start_date=None,
+            oldest_start_date,
             latest_start_date=None,
-            workflow_filter_dict=None
+            workflow_name=None,
+            version=None,
+            tag=None,
+            workflow_id=None,
     ):
         """
-        Count the number of open workflows for a domain. You can pass in filter criteria as a dict
+        Count the number of open workflows for a domain. You can pass in filtering criteria.
         The results are best effort and may not exactly reflect recent updates and changes.
         http://docs.aws.amazon.com/amazonswf/latest/apireference/API_CountOpenWorkflowExecutions.html
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :param workflow_filter_dict: dict. filter type as key and filter criteria as value. filter criteria is a dictionary
-        :return: Returns the number of open workflow executions within the given domain that meet the specified filtering criteria.
+        executionFilter , typeFilter and tagFilter are mutually exclusive. You can specify at most one of these in a request.
+
+        :param oldest_start_date: datetime. Specifies the oldest start date and time to return.
+        :param latest_start_date: datetime. Specifies the latest start date and time to return.
+        :param workflow_name: string. Required for typeFilter. Specifies the type of the workflow executions to be counted.
+        :param version: string. Optional for typeFilter. Version of the workflow type.
+        :param tag: string. Required for tagFilter. Specifies the tag that must be associated with the execution for it
+            to meet the filter criteria.
+        :param workflow_id: string. Required for executionFilter. The workflowId to pass of match the criteria of this filter.
+        :return: number of open workflows within time range
         """
-        if not workflow_filter_dict:
-            workflow_filter_dict = {}
+        workflow_filter_dict = _build_workflow_filter_dict(
+            workflow_name=workflow_name,
+            version=version,
+            tag=tag,
+            workflow_id=workflow_id,
+        )
 
         start_time_filter_dict = _build_time_filter_dict(
             oldest_start_date=oldest_start_date,
             latest_start_date=latest_start_date,
         )
-        if not start_time_filter_dict:
+
+        if workflow_filter_dict is None:
             return self.boto_client.count_open_workflow_executions(
                 domain=self.workflow_client_config.domain,
+                startTimeFilter=start_time_filter_dict['startTimeFilter'],
+            )
+        else:
+            return self.boto_client.count_open_workflow_executions(
+                domain=self.workflow_client_config.domain,
+                startTimeFilter=start_time_filter_dict['startTimeFilter'],
                 **workflow_filter_dict
             )
 
-        return self.boto_client.count_open_workflow_executions(
-            domain=self.workflow_client_config.domain,
-            startTimeFilter=start_time_filter_dict['startTimeFilter'],
-            **workflow_filter_dict
-        )
-
-    def _count_closed_workflow_executions(
+    def count_closed_workflow_executions(
             self,
             oldest_start_date=None,
             latest_start_date=None,
             oldest_close_date=None,
             latest_close_date=None,
-            workflow_filter_dict=None
+            workflow_name=None,
+            version=None,
+            tag=None,
+            workflow_id=None,
+            close_status=None,
     ):
         """
-        Count the number of closed workflows for a domain. You can pass in filtering criteria as a dict
+        Count the number of closed workflows for a domain. You can pass in filtering criteria.
         The results are best effort and may not exactly reflect recent updates and changes.
         http://docs.aws.amazon.com/amazonswf/latest/apireference/API_CountClosedWorkflowExecutions.html#SWF-CountClosedWorkflowExecutions-request-executionFilter
-        :param oldest_start_date: datetime
-        :param latest_start_date: datetime
-        :param oldest_close_date: datetime
-        :param latest_close_date: datetime
-        :param workflow_filter_dict: dict. filter type as key and filter criteria as value. filter criteria is a dictionary
+        startTimeFilter and closeTimeFilter are mutually exclusive. You MUST specify one of these in a request but not both.
+        closeStatusFilter , executionFilter , typeFilter and tagFilter are mutually exclusive. You can specify at most
+            one of these in a request.
+
+        :param oldest_start_date: datetime. Specifies the oldest start date and time to return.
+        :param latest_start_date: datetime. Specifies the latest start date and time to return.
+        :param oldest_close_date: datetime. Specifies the oldest close date and time to return.
+        :param latest_close_date: datetime. Specifies the latest close date and time to return.
+        :param workflow_name: string. Required for typeFilter. Specifies the type of the workflow executions to be counted.
+        :param version: string. Optional for typeFilter. Version of the workflow type.
+        :param tag: string. Required for tagFilter. Specifies the tag that must be associated with the execution for it
+            to meet the filter criteria.
+        :param workflow_id: string. Required for executionFilter. The workflowId to pass of match the criteria of this filter.
+        :param close_status: string.
+            valid status are ('COMPLETED', 'FAILED', 'CANCELED', 'TERMINATED', 'CONTINUED_AS_NEW', 'TIMED_OUT')
+            This filter has an affect only if executionStatus is specified as CLOSED
         :return: total number of closed workflows that meet the filter criteria
         """
-        if not workflow_filter_dict:
-            workflow_filter_dict = {}
-
         time_filter_dict = _build_time_filter_dict(
             oldest_start_date=oldest_start_date,
             latest_start_date=latest_start_date,
             oldest_close_date=oldest_close_date,
             latest_close_date=latest_close_date,
         )
-        if not time_filter_dict:
-            return self.boto_client.count_closed_workflow_executions(
-                domain=self.workflow_client_config.domain,
-                **workflow_filter_dict
-            )
 
-        for key in time_filter_dict:
-            time_filter_type = key
-        if time_filter_type == 'startTimeFilter':
-            return self.boto_client.count_closed_workflow_executions(
-                domain=self.workflow_client_config.domain,
-                startTimeFilter=time_filter_dict[time_filter_type],
-                **workflow_filter_dict
-            )
+        count_closed_workflow_within_time_range = partial(
+            self.boto_client.count_closed_workflow_executions,
+            domain=self.workflow_client_config.domain,
+            **time_filter_dict
+        )
+
+        workflow_filter_dict = _build_workflow_filter_dict(
+            workflow_name=workflow_name,
+            version=version,
+            tag=tag,
+            workflow_id=workflow_id,
+            close_status=close_status,
+        )
+
+        if workflow_filter_dict is None:
+            return count_closed_workflow_within_time_range()
         else:
-            return self.boto_client.count_closed_workflow_executions(
-                domain=self.workflow_client_config.domain,
-                closeTimeFilter=time_filter_dict[time_filter_type],
-                **workflow_filter_dict
-            )
+            return count_closed_workflow_within_time_range(**workflow_filter_dict)
 
 
 def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, oldest_close_date=None, latest_close_date=None):
@@ -406,3 +224,24 @@ def _build_execution_filter_dict(workflow_id):
 
 def _build_close_status_filter_dict(status):
     return {'closeStatusFilter': {'status': status}}
+
+
+def _build_workflow_filter_dict(
+        workflow_name=None,
+        version=None,
+        tag=None,
+        workflow_id=None,
+        close_status=None,
+):
+    if workflow_name:
+        workflow_filter_dict = _build_type_filter_dict(workflow_name, version)
+    elif tag:
+        workflow_filter_dict = _build_tag_filter_dict(tag)
+    elif workflow_id:
+        workflow_filter_dict = _build_execution_filter_dict(workflow_id)
+    elif close_status:
+        workflow_filter_dict = _build_close_status_filter_dict(close_status)
+    else:
+        workflow_filter_dict = None
+
+    return workflow_filter_dict
