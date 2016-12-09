@@ -41,36 +41,6 @@ def latest_close_date():
     return datetime(2016, 11, 29)
 
 
-@pytest.fixture
-def start_time_filter_with_oldest_date(oldest_start_date):
-    return dict(startTimeFilter=dict(oldestDate=oldest_start_date))
-
-
-@pytest.fixture
-def start_time_filter_with_both_date(oldest_start_date, latest_start_date):
-    return dict(
-        startTimeFilter=dict(
-            oldestDate=oldest_start_date,
-            latestDate=latest_start_date,
-        )
-    )
-
-
-@pytest.fixture
-def close_time_filter_with_oldest_date(oldest_close_date):
-    return dict(closeTimeFilter=dict(oldestDate=oldest_close_date))
-
-
-@pytest.fixture
-def close_time_filter_with_both_date(oldest_close_date, latest_close_date):
-    return dict(
-        closeTimeFilter=dict(
-            oldestDate=oldest_close_date,
-            latestDate=latest_close_date,
-        )
-    )
-
-
 def test_start_workflow(workflow_config, workflow_client, boto_client):
     boto_return = mock.MagicMock()
     boto_client.start_workflow_execution.return_value = boto_return

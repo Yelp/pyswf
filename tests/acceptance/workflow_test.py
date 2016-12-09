@@ -142,7 +142,7 @@ def test_count_open_workflow_executions(workflow_client):
     )
 
 
-def test_count_closed_workflow_exectuions(workflow_client):
+def test_count_closed_workflow_executions(workflow_client):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=datetime(2016, 11, 11),
     )
