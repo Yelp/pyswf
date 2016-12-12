@@ -79,7 +79,9 @@ class WorkflowClient(object):
         """
         Count the number of open workflows for a domain. You can pass in filtering criteria.
         The results are best effort and may not exactly reflect recent updates and changes.
-        http://docs.aws.amazon.com/amazonswf/latest/apireference/API_CountOpenWorkflowExecutions.html
+
+        Passthrough to :meth:~SWF.Client.count_open_workflow_executions``
+
         executionFilter , typeFilter and tagFilter are mutually exclusive. You can specify at most one of these in a request.
 
         :param oldest_start_date: datetime. Specifies the oldest start date and time to return.
@@ -103,17 +105,11 @@ class WorkflowClient(object):
             latest_start_date=latest_start_date,
         )
 
-        if workflow_filter_dict is None:
-            return self.boto_client.count_open_workflow_executions(
-                domain=self.workflow_client_config.domain,
-                startTimeFilter=start_time_filter_dict['startTimeFilter'],
-            )
-        else:
-            return self.boto_client.count_open_workflow_executions(
-                domain=self.workflow_client_config.domain,
-                startTimeFilter=start_time_filter_dict['startTimeFilter'],
-                **workflow_filter_dict
-            )
+        return self.boto_client.count_open_workflow_executions(
+            domain=self.workflow_client_config.domain,
+            startTimeFilter=start_time_filter_dict['startTimeFilter'],
+            **workflow_filter_dict
+        )
 
     def count_closed_workflow_executions(
             self,
@@ -130,7 +126,9 @@ class WorkflowClient(object):
         """
         Count the number of closed workflows for a domain. You can pass in filtering criteria.
         The results are best effort and may not exactly reflect recent updates and changes.
-        http://docs.aws.amazon.com/amazonswf/latest/apireference/API_CountClosedWorkflowExecutions.html#SWF-CountClosedWorkflowExecutions-request-executionFilter
+
+        Passthrough to :meth:~SWF.Client.count_closed_workflow_executions``
+
         startTimeFilter and closeTimeFilter are mutually exclusive. You MUST specify one of these in a request but not both.
         closeStatusFilter , executionFilter , typeFilter and tagFilter are mutually exclusive. You can specify at most
             one of these in a request.
@@ -170,10 +168,7 @@ class WorkflowClient(object):
             close_status=close_status,
         )
 
-        if workflow_filter_dict is None:
-            return count_closed_workflow_within_time_range()
-        else:
-            return count_closed_workflow_within_time_range(**workflow_filter_dict)
+        return count_closed_workflow_within_time_range(**workflow_filter_dict)
 
 
 def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, oldest_close_date=None, latest_close_date=None):
@@ -242,6 +237,6 @@ def _build_workflow_filter_dict(
     elif close_status:
         workflow_filter_dict = _build_close_status_filter_dict(close_status)
     else:
-        workflow_filter_dict = None
+        workflow_filter_dict = dict()
 
     return workflow_filter_dict
