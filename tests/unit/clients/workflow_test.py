@@ -81,7 +81,7 @@ def test_terminate_workflow(workflow_config, workflow_client, boto_client):
 
 def test_build_time_filter_dict(oldest_start_date, latest_start_date):
     time_filter_dict = _build_time_filter_dict()
-    assert time_filter_dict is None
+    assert time_filter_dict == {}
 
     start_date = oldest_start_date
     time_filter_dict = _build_time_filter_dict(oldest_start_date=start_date)

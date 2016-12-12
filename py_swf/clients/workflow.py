@@ -78,7 +78,8 @@ class WorkflowClient(object):
     ):
         """
         Count the number of open workflows for a domain. You can pass in filtering criteria.
-        The results are best effort and may not exactly reflect recent updates and changes.
+        This operation is eventually consistent. The results are best effort and may not exactly reflect recent updates
+        and changes. Worklfows started or closed near the time when calling count_open_workflow_executions may not be reflected
 
         Passthrough to :meth:~SWF.Client.count_open_workflow_executions``
 
@@ -125,7 +126,8 @@ class WorkflowClient(object):
     ):
         """
         Count the number of closed workflows for a domain. You can pass in filtering criteria.
-        The results are best effort and may not exactly reflect recent updates and changes.
+        This operation is eventually consistent. The results are best effort and may not exactly reflect recent updates
+        and changes. Worklfows started or closed near the time when calling count_open_workflow_executions may not be reflected
 
         Passthrough to :meth:~SWF.Client.count_closed_workflow_executions``
 
@@ -176,35 +178,37 @@ def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, olde
     Build time_filter_dict for calls to _count_closed_workflow_executions and _count_open_workflow_executions.
     Return result is a dict: {time_filter_type : filter_dict}
     filter_dict must contains key 'oldestDate'.
-    return example:
-    {
-        'startTimeFilter': {
-            'oldestDate': datetime(2016, 11, 11)
+    sample input:
+        oldest_start_date=datetime(2016, 11, 11)
+        return example:
+        {
+            'startTimeFilter': {
+                'oldestDate': datetime(2016, 11, 11)
+            }
         }
-    }
-    If no oldest_date specified, return None
+    If no oldest_date specified, return empty dict
     """
-    date_tuple = ()
+    result = {}
+
     if oldest_start_date:
-        filter_type = 'startTimeFilter'
-        date_tuple = (oldest_start_date, latest_start_date)
-    elif oldest_close_date:
-        filter_type = 'closeTimeFilter'
-        date_tuple = (oldest_close_date, latest_close_date)
+        result.update({'startTimeFilter': _build_time_range(oldest_start_date, latest_start_date)})
 
-    if not date_tuple:
-        return None
+    if oldest_close_date:
+        result.update({'closeTimeFilter': _build_time_range(oldest_close_date, latest_close_date)})
 
-    oldest_date, latest_date = date_tuple
-    filter_dict = dict(oldestDate=oldest_date)
-    if latest_date:
-        filter_dict['latestDate'] = latest_date
-    return {filter_type: filter_dict}
+    return result
+
+
+def _build_time_range(oldest_date, latest_date):
+    result = {'oldestDate': oldest_date}
+    if latest_date is not None:
+        result['latestDate'] = latest_date
+    return result
 
 
 def _build_type_filter_dict(name, version):
     filter_dict = {'name': name}
-    if version:
+    if version is not None:
         filter_dict['version'] = version
     return {'typeFilter': filter_dict}
 
@@ -237,6 +241,6 @@ def _build_workflow_filter_dict(
     elif close_status:
         workflow_filter_dict = _build_close_status_filter_dict(close_status)
     else:
-        workflow_filter_dict = dict()
+        workflow_filter_dict = {}
 
     return workflow_filter_dict
