@@ -4,6 +4,8 @@ provides examples on how to use this library.
 """
 from __future__ import absolute_import
 from __future__ import unicode_literals
+from botocore.exceptions import ClientError
+from unittest import TestCase
 
 import uuid
 
@@ -142,6 +144,15 @@ def test_count_open_workflow_executions(workflow_client):
     )
 
 
+class ExceptionAssertionHelper(TestCase):
+    def __init__(self, excpt, func):
+        self.test_method = func
+        self.excpetion_type = excpt
+
+    def run_test(self, *args, **kwargs):
+        self.assertRaises(self.excpetion_type, self.test_method, *args, **kwargs)
+
+
 def test_count_closed_workflow_executions(workflow_client):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=datetime(2016, 11, 11),
@@ -157,6 +168,14 @@ def test_count_closed_workflow_executions(workflow_client):
     )
 
     workflow_client.count_closed_workflow_executions(
+        oldest_close_date=datetime(2016, 11, 12),
+        latest_close_date=datetime(2016, 11, 13),
+    )
+
+    invalid_date_test_helper = ExceptionAssertionHelper(ClientError, workflow_client.count_closed_workflow_executions)
+    invalid_date_test_helper.run_test(
+        oldest_start_date=datetime(2016, 11, 11),
+        latest_start_date=datetime(2016, 11, 12),
         oldest_close_date=datetime(2016, 11, 12),
         latest_close_date=datetime(2016, 11, 13),
     )
@@ -179,5 +198,15 @@ def test_count_closed_workflow_executions(workflow_client):
 
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=datetime(2016, 11, 11),
+        close_status='COMPLETED',
+    )
+
+    invalid_workflow_filter_test_helper = ExceptionAssertionHelper(ClientError, workflow_client.count_closed_workflow_executions)
+    invalid_workflow_filter_test_helper.run_test(
+        oldest_start_date=datetime(2016, 11, 11),
+        latest_start_date=datetime(2016, 11, 12),
+        workflow_name='workflow',
+        tag='tag',
+        workflow_id=str(uuid.uuid4()),
         close_status='COMPLETED',
     )

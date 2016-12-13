@@ -228,15 +228,13 @@ def _build_workflow_filter_dict(
         workflow_id=None,
         close_status=None,
 ):
+    workflow_filter_dict = {}
     if workflow_name:
-        workflow_filter_dict = _build_type_filter_dict(workflow_name, version)
-    elif tag:
-        workflow_filter_dict = _build_tag_filter_dict(tag)
-    elif workflow_id:
-        workflow_filter_dict = _build_execution_filter_dict(workflow_id)
-    elif close_status:
-        workflow_filter_dict = _build_close_status_filter_dict(close_status)
-    else:
-        workflow_filter_dict = {}
-
+        workflow_filter_dict.update(_build_type_filter_dict(workflow_name, version))
+    if tag:
+        workflow_filter_dict.update(_build_tag_filter_dict(tag))
+    if workflow_id:
+        workflow_filter_dict.update(_build_execution_filter_dict(workflow_id))
+    if close_status:
+        workflow_filter_dict.update(_build_close_status_filter_dict(close_status))
     return workflow_filter_dict
