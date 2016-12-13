@@ -79,60 +79,78 @@ def test_terminate_workflow(workflow_config, workflow_client, boto_client):
     )
 
 
-def test_build_time_filter_dict(oldest_start_date, latest_start_date):
+def test_build_time_filter_dict_without_date():
     time_filter_dict = _build_time_filter_dict()
     assert time_filter_dict == {}
 
-    start_date = oldest_start_date
-    time_filter_dict = _build_time_filter_dict(oldest_start_date=start_date)
+
+def test_build_time_filter_dict_with_oldest_start_date(oldest_start_date):
+    time_filter_dict = _build_time_filter_dict(oldest_start_date=oldest_start_date)
     assert 'startTimeFilter' in time_filter_dict
-    assert time_filter_dict['startTimeFilter'] == {'oldestDate': start_date}
+    assert time_filter_dict['startTimeFilter'] == {'oldestDate': oldest_start_date}
 
-    time_filter_dict = _build_time_filter_dict(oldest_close_date=start_date)
+
+def test_build_time_filter_dict_with_oldest_close_date(oldest_close_date):
+    time_filter_dict = _build_time_filter_dict(oldest_close_date=oldest_close_date)
     assert 'closeTimeFilter' in time_filter_dict
-    assert time_filter_dict['closeTimeFilter'] == {'oldestDate': start_date}
+    assert time_filter_dict['closeTimeFilter'] == {'oldestDate': oldest_close_date}
 
-    end_date = latest_start_date
-    time_filter_dict = _build_time_filter_dict(oldest_start_date=start_date, latest_start_date=end_date)
+
+def test_build_time_filter_dict_with_start_date_range(oldest_start_date, latest_start_date):
+    time_filter_dict = _build_time_filter_dict(oldest_start_date=oldest_start_date, latest_start_date=latest_start_date)
     assert 'startTimeFilter' in time_filter_dict
-    assert time_filter_dict['startTimeFilter'] == {'oldestDate': start_date, 'latestDate': end_date}
+    assert time_filter_dict['startTimeFilter'] == {'oldestDate': oldest_start_date, 'latestDate': latest_start_date}
 
-    time_filter_dict = _build_time_filter_dict(oldest_close_date=start_date, latest_close_date=end_date)
+
+def test_build_time_filter_dict_with_close_date_range(oldest_close_date, latest_close_date):
+    time_filter_dict = _build_time_filter_dict(oldest_close_date=oldest_close_date, latest_close_date=latest_close_date)
     assert 'closeTimeFilter' in time_filter_dict
-    assert time_filter_dict['closeTimeFilter'] == {'oldestDate': start_date, 'latestDate': end_date}
+    assert time_filter_dict['closeTimeFilter'] == {'oldestDate': oldest_close_date, 'latestDate': latest_close_date}
 
 
-def test_count_open_workflow_executions(workflow_config, workflow_client, boto_client, oldest_start_date, latest_start_date):
+def test_count_open_workflow_executions_with_oldest_start_time(workflow_config, workflow_client, boto_client, oldest_start_date):
     workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
     )
-    _assert_count_open_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_open_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
     )
 
+
+def test_count_open_workflow_executions_with_start_time_range(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+        latest_start_date
+):
     workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
         latest_start_date=latest_start_date,
     )
-    _assert_count_open_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_open_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(
             oldestDate=oldest_start_date,
             latestDate=latest_start_date,
         ),
     )
 
+
+def test_count_open_workflow_executions_with_oldest_start_time_and_workflow_name(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
         workflow_name='test',
         version='test',
     )
-    _assert_count_open_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_open_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         typeFilter=dict(
             name='test',
@@ -140,77 +158,111 @@ def test_count_open_workflow_executions(workflow_config, workflow_client, boto_c
         )
     )
 
+
+def test_count_open_workflow_executions_with_oldest_start_time_and_tag(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
         tag='test',
     )
-    _assert_count_open_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_open_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         tagFilter=dict(tag='test'),
     )
 
+
+def test_count_open_workflow_executions_with_oldest_start_time_and_workflow_id(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
         workflow_id='test'
     )
-    _assert_count_open_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_open_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         executionFilter=dict(workflowId='test'),
     )
 
 
-def test_count_closed_workflow_executions(
+def test_count_closed_workflow_executions_and_oldest_start_time(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
+    workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date)
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
+        startTimeFilter=dict(oldestDate=oldest_start_date)
+    )
+
+
+def test_count_closed_workflow_executions_with_start_time_range(
         workflow_config,
         workflow_client,
         boto_client,
         oldest_start_date,
         latest_start_date,
-        oldest_close_date,
-        latest_close_date,
 ):
-    workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
-        startTimeFilter=dict(oldestDate=oldest_start_date)
-    )
-
     workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date, latest_start_date=latest_start_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(
             oldestDate=oldest_start_date,
             latestDate=latest_start_date,
         )
     )
 
-    workflow_client.count_closed_workflow_executions(oldest_close_date=oldest_close_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
+
+def test_count_closed_workflow_executions_with_oldest_close_time(
         workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+):
+    workflow_client.count_closed_workflow_executions(oldest_close_date=oldest_close_date)
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date),
     )
 
-    workflow_client.count_closed_workflow_executions(oldest_close_date=oldest_close_date, latest_close_date=latest_close_date)
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
+
+def test_count_closed_workflow_executions_with_close_time_range(
         workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+        latest_close_date,
+):
+    workflow_client.count_closed_workflow_executions(oldest_close_date=oldest_close_date, latest_close_date=latest_close_date)
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date, latestDate=latest_close_date),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_start_time_and_workflow_name(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=oldest_start_date,
         workflow_name='test',
         version='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         typeFilter=dict(
             name='test',
@@ -218,14 +270,20 @@ def test_count_closed_workflow_executions(
         ),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_close_time_and_workflow_name(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_close_date=oldest_close_date,
         workflow_name='test',
         version='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date),
         typeFilter=dict(
             name='test',
@@ -233,83 +291,104 @@ def test_count_closed_workflow_executions(
         ),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_start_time_and_tag(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=oldest_start_date,
         tag='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         tagFilter=dict(tag='test'),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_close_time_and_tag(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_close_date=oldest_close_date,
         tag='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date),
         tagFilter=dict(tag='test'),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_start_time_and_workflow_id(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=oldest_start_date,
         workflow_id='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         executionFilter=dict(workflowId='test'),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_close_time_and_workflow_id(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_close_date=oldest_close_date,
         workflow_id='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date),
         executionFilter=dict(workflowId='test'),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_start_time_and_close_status(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_start_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_start_date=oldest_start_date,
         close_status='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
         closeStatusFilter=dict(status='test'),
     )
 
+
+def test_count_closed_workflow_executions_with_oldest_close_time_and_close_status(
+        workflow_config,
+        workflow_client,
+        boto_client,
+        oldest_close_date,
+):
     workflow_client.count_closed_workflow_executions(
         oldest_close_date=oldest_close_date,
         close_status='test',
     )
-    _assert_count_closed_workflow_executions_called_with(
-        boto_client,
-        workflow_config,
+    boto_client.count_closed_workflow_executions.assert_called_with(
+        domain=workflow_config.domain,
         closeTimeFilter=dict(oldestDate=oldest_close_date),
         closeStatusFilter=dict(status='test'),
-    )
-
-
-def _assert_count_open_workflow_executions_called_with(boto_client, workflow_config, **kwargs):
-    _assert_boto_method_called_with(boto_client.count_open_workflow_executions, workflow_config.domain, **kwargs)
-
-
-def _assert_count_closed_workflow_executions_called_with(boto_client, workflow_config, **kwargs):
-    _assert_boto_method_called_with(boto_client.count_closed_workflow_executions, workflow_config.domain, **kwargs)
-
-
-def _assert_boto_method_called_with(boto_method, domain, **kwargs):
-    boto_method.assert_called_with(
-        domain=domain,
-        **kwargs
     )
