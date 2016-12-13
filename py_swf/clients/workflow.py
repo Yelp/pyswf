@@ -2,8 +2,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from functools import partial
-
 __all__ = ['WorkflowClient']
 
 
@@ -156,12 +154,6 @@ class WorkflowClient(object):
             latest_close_date=latest_close_date,
         )
 
-        count_closed_workflow_within_time_range = partial(
-            self.boto_client.count_closed_workflow_executions,
-            domain=self.workflow_client_config.domain,
-            **time_filter_dict
-        )
-
         workflow_filter_dict = _build_workflow_filter_dict(
             workflow_name=workflow_name,
             version=version,
@@ -169,8 +161,12 @@ class WorkflowClient(object):
             workflow_id=workflow_id,
             close_status=close_status,
         )
+        workflow_filter_dict.update(time_filter_dict)
 
-        return count_closed_workflow_within_time_range(**workflow_filter_dict)
+        return self.boto_client.count_closed_workflow_executions(
+            domain=self.workflow_client_config.domain,
+            **workflow_filter_dict
+        )
 
 
 def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, oldest_close_date=None, latest_close_date=None):
