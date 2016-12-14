@@ -3,6 +3,11 @@
 History
 -------
 
+1.3.0 (2016-12-12)
+++++++++++++++++++
+
+* WorkflowClient now supports count open or closed workflows by filter. Filter includes start time, close time, workflow type, tag, workflow id and close status.
+
 1.1.0 (2016-10-03)
 ++++++++++++++++++
 
