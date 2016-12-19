@@ -44,9 +44,13 @@ def latest_close_date():
 def test_start_workflow(workflow_config, workflow_client, boto_client):
     boto_return = mock.MagicMock()
     boto_client.start_workflow_execution.return_value = boto_return
+    workflow_name = 'test'
+    version = '0.1'
     actual_run_id = workflow_client.start_workflow(
         input='meow',
         id='cat',
+        workflow_name=workflow_name,
+        version=version,
     )
 
     boto_client.start_workflow_execution.assert_called_once_with(
@@ -55,8 +59,8 @@ def test_start_workflow(workflow_config, workflow_client, boto_client):
         workflowId='cat',
         input='meow',
         workflowType={
-            'name': workflow_config.workflow_name,
-            'version': workflow_config.workflow_version,
+            'name': workflow_name,
+            'version': version,
         },
         taskList={
             'name': workflow_config.task_list,

@@ -7,7 +7,7 @@ from collections import namedtuple
 
 WorkflowClientConfig = namedtuple(
     'WorkflowClientConfig',
-    'domain workflow_name workflow_version task_list execution_start_to_close_timeout task_start_to_close_timeout',
+    'domain task_list execution_start_to_close_timeout task_start_to_close_timeout',
 )
 """An immutable object that stores common SWF values. Used by instances of :class:`~py_swf.clients.workflow.WorkflowClient`.
 """

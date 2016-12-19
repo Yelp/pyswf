@@ -18,7 +18,7 @@ class WorkflowClient(object):
         self.workflow_client_config = workflow_client_config
         self.boto_client = boto_client
 
-    def start_workflow(self, input, id):
+    def start_workflow(self, input, id, workflow_name, version):
         """Enqueues and starts a workflow to SWF.
 
         Passthrough to :meth:`~SWF.Client.start_workflow_execution`.
@@ -27,6 +27,11 @@ class WorkflowClient(object):
         :type input: string
         :param id: Freeform string that represents a unique identifier for the workflow.
         :type id: string
+        :param workflow_name: The name of the workflow type. The combination of workflow type name and version must be
+            unique with in a domain.
+        :type workflow_name: string
+        :param version: The version of the workflow type.
+        :type version: string
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
@@ -36,8 +41,8 @@ class WorkflowClient(object):
             workflowId=id,
             input=input,
             workflowType={
-                'name': self.workflow_client_config.workflow_name,
-                'version': self.workflow_client_config.workflow_version,
+                'name': workflow_name,
+                'version': version,
             },
             taskList={
                 'name': self.workflow_client_config.task_list,
