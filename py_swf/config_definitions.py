@@ -12,22 +12,6 @@ WorkflowClientConfig = namedtuple(
 """An immutable object that stores common SWF values. Used by instances of :class:`~py_swf.clients.workflow.WorkflowClient`.
 """
 
-StartWorkflowResult = namedtuple(
-    'StartWorkflowResult',
-    'run_id'
-)
-"""
-An immutable object that stores response after calling start_workflow_execution.
-Used by instances of :class:`~py_swf.clients.workflow.WorkflowClient`.
-"""
-
-CountWorkflowsResult = namedtuple(
-    'CountWorkflowsResult',
-    'count truncated',
-)
-"""An immutable object that stores results of counting workflows. Used by instances of :class:`~py_swf.clients.WorkflowClient`.
-"""
-
 DecisionConfig = namedtuple(
     'DecisionConfig',
     'domain task_list schedule_to_close_timeout schedule_to_start_timeout start_to_close_timeout heartbeat_timeout',
