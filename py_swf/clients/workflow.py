@@ -2,6 +2,9 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from py_swf.config_definitions import StartWorkflowResult
+from py_swf.config_definitions import CountWorkflowsResult
+
 __all__ = ['WorkflowClient']
 
 
@@ -35,21 +38,24 @@ class WorkflowClient(object):
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
-        return self.boto_client.start_workflow_execution(
-            domain=self.workflow_client_config.domain,
-            childPolicy='TERMINATE',
-            workflowId=id,
-            input=input,
-            workflowType={
-                'name': workflow_name,
-                'version': version,
-            },
-            taskList={
-                'name': self.workflow_client_config.task_list,
-            },
-            executionStartToCloseTimeout=str(self.workflow_client_config.execution_start_to_close_timeout),
-            taskStartToCloseTimeout=str(self.workflow_client_config.task_start_to_close_timeout),
-        )['runId']
+        start_workflow_result = StartWorkflowResult(
+            run_id=self.boto_client.start_workflow_execution(
+                domain=self.workflow_client_config.domain,
+                childPolicy='TERMINATE',
+                workflowId=id,
+                input=input,
+                workflowType={
+                    'name': workflow_name,
+                    'version': version,
+                },
+                taskList={
+                    'name': self.workflow_client_config.task_list,
+                },
+                executionStartToCloseTimeout=str(self.workflow_client_config.execution_start_to_close_timeout),
+                taskStartToCloseTimeout=str(self.workflow_client_config.task_start_to_close_timeout),
+            )['runId']
+        )
+        return start_workflow_result.run_id
 
     def terminate_workflow(self, workflow_id, reason):
         """Forcefully terminates a workflow by preventing further responding and executions of
@@ -109,11 +115,14 @@ class WorkflowClient(object):
             latest_start_date=latest_start_date,
         )
 
-        return self.boto_client.count_open_workflow_executions(
-            domain=self.workflow_client_config.domain,
-            startTimeFilter=start_time_filter_dict['startTimeFilter'],
-            **workflow_filter_dict
+        count_open_workflows_result = CountWorkflowsResult(
+            **self.boto_client.count_open_workflow_executions(
+                domain=self.workflow_client_config.domain,
+                startTimeFilter=start_time_filter_dict['startTimeFilter'],
+                **workflow_filter_dict
+            )
         )
+        return count_open_workflows_result.count
 
     def count_closed_workflow_executions(
             self,
@@ -168,10 +177,13 @@ class WorkflowClient(object):
         )
         workflow_filter_dict.update(time_filter_dict)
 
-        return self.boto_client.count_closed_workflow_executions(
-            domain=self.workflow_client_config.domain,
-            **workflow_filter_dict
+        count_closed_workflows_result = CountWorkflowsResult(
+            **self.boto_client.count_closed_workflow_executions(
+                domain=self.workflow_client_config.domain,
+                **workflow_filter_dict
+            )
         )
+        return count_closed_workflows_result.count
 
 
 def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, oldest_close_date=None, latest_close_date=None):

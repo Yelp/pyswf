@@ -17,6 +17,23 @@ def workflow_config():
 
 
 @pytest.fixture
+def boto_client():
+    mocked_boto_client = mock.Mock()
+    mocked_boto_client.count_open_workflow_executions.return_value = {
+        'count': 123,
+        'truncated': False
+    }
+    mocked_boto_client.count_closed_workflow_executions.return_value = {
+        'count': 321,
+        'truncated': True
+    }
+    mocked_boto_client.start_workflow_execution.return_value = {
+        'runId': 233
+    }
+    return mocked_boto_client
+
+
+@pytest.fixture
 def workflow_client(workflow_config, boto_client):
     return WorkflowClient(workflow_config, boto_client)
 
@@ -113,9 +130,10 @@ def test_build_time_filter_dict_with_close_date_range(oldest_close_date, latest_
 
 
 def test_count_open_workflow_executions_with_oldest_start_time(workflow_config, workflow_client, boto_client, oldest_start_date):
-    workflow_client.count_open_workflow_executions(
+    count = workflow_client.count_open_workflow_executions(
         oldest_start_date=oldest_start_date,
     )
+    assert count == 123
     boto_client.count_open_workflow_executions.assert_called_with(
         domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date),
@@ -203,7 +221,8 @@ def test_count_closed_workflow_executions_and_oldest_start_time(
         boto_client,
         oldest_start_date,
 ):
-    workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date)
+    count = workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date)
+    assert count == 321
     boto_client.count_closed_workflow_executions.assert_called_with(
         domain=workflow_config.domain,
         startTimeFilter=dict(oldestDate=oldest_start_date)
