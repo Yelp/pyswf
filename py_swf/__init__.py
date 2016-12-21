@@ -4,4 +4,4 @@ from __future__ import unicode_literals
 
 __author__ = 'Henri Bai'
 __email__ = 'hbai@yelp.com'
-__version__ = '1.3.0'
+__version__ = '1.4.0'

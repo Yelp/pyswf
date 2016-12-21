@@ -2,7 +2,22 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from collections import namedtuple
+
 __all__ = ['WorkflowClient']
+
+CountWorkflowsResult = namedtuple(
+    'CountWorkflowsResult',
+    'count truncated',
+)
+"""
+An immutable object that stores results of counting workflows.
+Wrapper around response from :meth:`~SWF.Client.count_closed_workflow_executions and
+:meth:`~SWF.Client.count_open_workflow_executions.
+count (integer) -- The number of workflow executions.
+truncated (boolean) -- If set to true, indicates that the actual count was more than the maximum supported by this API
+    and the count returned is the truncated value.
+"""
 
 
 class WorkflowClient(object):
@@ -18,7 +33,7 @@ class WorkflowClient(object):
         self.workflow_client_config = workflow_client_config
         self.boto_client = boto_client
 
-    def start_workflow(self, input, id):
+    def start_workflow(self, input, id, workflow_name, version):
         """Enqueues and starts a workflow to SWF.
 
         Passthrough to :meth:`~SWF.Client.start_workflow_execution`.
@@ -27,6 +42,11 @@ class WorkflowClient(object):
         :type input: string
         :param id: Freeform string that represents a unique identifier for the workflow.
         :type id: string
+        :param workflow_name: The name of the workflow type. The combination of workflow type name and version must be
+            unique with in a domain.
+        :type workflow_name: string
+        :param version: The version of the workflow type.
+        :type version: string
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
@@ -36,8 +56,8 @@ class WorkflowClient(object):
             workflowId=id,
             input=input,
             workflowType={
-                'name': self.workflow_client_config.workflow_name,
-                'version': self.workflow_client_config.workflow_version,
+                'name': workflow_name,
+                'version': version,
             },
             taskList={
                 'name': self.workflow_client_config.task_list,
@@ -104,11 +124,12 @@ class WorkflowClient(object):
             latest_start_date=latest_start_date,
         )
 
-        return self.boto_client.count_open_workflow_executions(
+        response = self.boto_client.count_open_workflow_executions(
             domain=self.workflow_client_config.domain,
             startTimeFilter=start_time_filter_dict['startTimeFilter'],
             **workflow_filter_dict
         )
+        return CountWorkflowsResult(count=response['count'], truncated=response['truncated'])
 
     def count_closed_workflow_executions(
             self,
@@ -163,10 +184,11 @@ class WorkflowClient(object):
         )
         workflow_filter_dict.update(time_filter_dict)
 
-        return self.boto_client.count_closed_workflow_executions(
+        response = self.boto_client.count_closed_workflow_executions(
             domain=self.workflow_client_config.domain,
             **workflow_filter_dict
         )
+        return CountWorkflowsResult(count=response['count'], truncated=response['truncated'])
 
 
 def _build_time_filter_dict(oldest_start_date=None, latest_start_date=None, oldest_close_date=None, latest_close_date=None):

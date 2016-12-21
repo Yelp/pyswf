@@ -103,8 +103,6 @@ def workflow_client(boto_client, domain_name, task_list, workflow_name, version,
     workflow_client_config = WorkflowClientConfig(
         domain=domain_name,
         task_list=task_list,
-        workflow_name=workflow_name,
-        workflow_version=version,
         execution_start_to_close_timeout=5,
         task_start_to_close_timeout=5,
     )

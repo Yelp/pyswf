@@ -25,6 +25,8 @@ def start_workflow(workflow_client, workflow_id):
             meow='yes',
         )),
         id=workflow_id,
+        workflow_name='test',
+        version='0.1'
     )
 
 
