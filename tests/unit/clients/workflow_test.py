@@ -134,10 +134,11 @@ class TestCountOpenWorkflowExecutions:
             mocked_boto_client,
             oldest_start_date
     ):
-        count = workflow_client.count_open_workflow_executions(
+        response = workflow_client.count_open_workflow_executions(
             oldest_start_date=oldest_start_date,
-        ).count
-        assert count == 123
+        )
+        assert response.count == 123
+        assert not response.truncated
         mocked_boto_client.count_open_workflow_executions.assert_called_with(
             domain=workflow_config.domain,
             startTimeFilter=dict(oldestDate=oldest_start_date),
@@ -241,8 +242,9 @@ class TestCountClosedWorkflowExecutions:
             mocked_boto_client,
             oldest_start_date,
     ):
-        count = workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date).count
-        assert count == 321
+        response = workflow_client.count_closed_workflow_executions(oldest_start_date=oldest_start_date)
+        assert response.count == 321
+        assert response.truncated
         mocked_boto_client.count_closed_workflow_executions.assert_called_with(
             domain=workflow_config.domain,
             startTimeFilter=dict(oldestDate=oldest_start_date)

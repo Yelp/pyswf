@@ -12,6 +12,8 @@ CountWorkflowsResult = namedtuple(
 )
 """
 An immutable object that stores results of counting workflows.
+Wrapper around response from :meth:`~SWF.Client.count_closed_workflow_executions and
+:meth:`~SWF.Client.count_open_workflow_executions.
 count (integer) -- The number of workflow executions.
 truncated (boolean) -- If set to true, indicates that the actual count was more than the maximum supported by this API
     and the count returned is the truncated value.
