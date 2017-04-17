@@ -33,7 +33,15 @@ class WorkflowClient(object):
         self.workflow_client_config = workflow_client_config
         self.boto_client = boto_client
 
-    def start_workflow(self, input, id, workflow_name, version):
+    def start_workflow(
+        self,
+        input,
+        id,
+        workflow_name,
+        version,
+        workflow_start_to_close_timeout=None,
+        activity_start_to_close_timeout=None
+    ):
         """Enqueues and starts a workflow to SWF.
 
         Passthrough to :meth:`~SWF.Client.start_workflow_execution`.
@@ -47,9 +55,22 @@ class WorkflowClient(object):
         :type workflow_name: string
         :param version: The version of the workflow type.
         :type version: string
+        :param workflow_start_to_close_timeout: specify a workflow execution timeout for current workflow execution.
+        http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
+        :type workflow_start_to_close_timeout: int
+        :param activity_start_to_close_timeout: specify an activity execution timeout for current workflow execution.
+        http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
+        :type activity_start_to_close_timeout: int
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
+        execution_start_to_close_timeout = str(self.workflow_client_config.execution_start_to_close_timeout)
+        task_start_to_close_timeout = str(self.workflow_client_config.task_start_to_close_timeout)
+        if workflow_start_to_close_timeout:
+            execution_start_to_close_timeout = str(workflow_start_to_close_timeout)
+        if activity_start_to_close_timeout:
+            task_start_to_close_timeout = str(activity_start_to_close_timeout)
+
         return self.boto_client.start_workflow_execution(
             domain=self.workflow_client_config.domain,
             childPolicy='TERMINATE',
@@ -62,8 +83,8 @@ class WorkflowClient(object):
             taskList={
                 'name': self.workflow_client_config.task_list,
             },
-            executionStartToCloseTimeout=str(self.workflow_client_config.execution_start_to_close_timeout),
-            taskStartToCloseTimeout=str(self.workflow_client_config.task_start_to_close_timeout),
+            executionStartToCloseTimeout=execution_start_to_close_timeout,
+            taskStartToCloseTimeout=task_start_to_close_timeout,
         )['runId']
 
     def terminate_workflow(self, workflow_id, reason):

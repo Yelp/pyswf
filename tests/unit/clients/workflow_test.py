@@ -71,6 +71,39 @@ def test_start_workflow(workflow_config, workflow_client, boto_client):
     assert actual_run_id == boto_return['runId']
 
 
+def test_start_workflow_with_overriding_timeout(workflow_config, workflow_client, boto_client):
+    boto_return = mock.MagicMock()
+    boto_client.start_workflow_execution.return_value = boto_return
+    workflow_name = 'test'
+    version = '0.1'
+    workflow_timeout = 123
+    activity_timeout = 233
+    workflow_client.start_workflow(
+        input='meow',
+        id='cat',
+        workflow_name=workflow_name,
+        version=version,
+        workflow_start_to_close_timeout=workflow_timeout,
+        activity_start_to_close_timeout=activity_timeout,
+    )
+
+    boto_client.start_workflow_execution.assert_called_once_with(
+        domain=workflow_config.domain,
+        childPolicy='TERMINATE',
+        workflowId='cat',
+        input='meow',
+        workflowType={
+            'name': workflow_name,
+            'version': version,
+        },
+        taskList={
+            'name': workflow_config.task_list,
+        },
+        executionStartToCloseTimeout=str(workflow_timeout),
+        taskStartToCloseTimeout=str(activity_timeout),
+    )
+
+
 def test_terminate_workflow(workflow_config, workflow_client, boto_client):
     workflow_client.terminate_workflow(
         'workflow_id',
