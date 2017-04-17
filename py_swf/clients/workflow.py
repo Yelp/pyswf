@@ -55,9 +55,11 @@ class WorkflowClient(object):
         :type workflow_name: string
         :param version: The version of the workflow type.
         :type version: string
-        :param workflow_start_to_close_timeout: specify a workflow execution timeout for current workflow execution. http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
+        :param workflow_start_to_close_timeout: specify a workflow execution timeout for current workflow execution.
+        http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
         :type workflow_start_to_close_timeout: int
-        :param activity_start_to_close_timeout: specify an activity execution timeout for current workflow execution. http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
+        :param activity_start_to_close_timeout: specify an activity execution timeout for current workflow execution.
+        http://docs.aws.amazon.com/amazonswf/latest/developerguide/setting-timeouts.html
         :type activity_start_to_close_timeout: int
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
