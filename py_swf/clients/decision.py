@@ -157,7 +157,7 @@ class DecisionClient(object):
 
             kwargs['nextPageToken'] = next_page_token
 
-    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input, override_config_dict):
+    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input, override_config_dict=None):
         """Responds to a given decision task's task_token to schedule an activity task to run.
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
@@ -217,7 +217,8 @@ def build_workflow_complete(result):
     }
 
 
-def build_activity_task(activity_id, activity_name, activity_version, input, decision_config, override_config_dict):
+def build_activity_task(activity_id, activity_name, activity_version, input, decision_config, override_config_dict=None):
+    override_config_dict = override_config_dict or {}
     schedule_to_close_timeout = override_config_dict.get('schedule_to_close_timeout', None) or decision_config.schedule_to_close_timeout
     schedule_to_start_timeout = override_config_dict.get('schedule_to_start_timeout', None) or decision_config.schedule_to_start_timeout
     start_to_close_timeout = override_config_dict.get('start_to_close_timeout', None) or decision_config.start_to_close_timeout

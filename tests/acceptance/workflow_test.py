@@ -18,7 +18,7 @@ import simplejson
 pytestmark = pytest.mark.xfail
 
 
-def start_workflow(workflow_client, workflow_id):
+def start_workflow(workflow_client, workflow_id, workflow_start_to_close_timeout=None):
     return workflow_client.start_workflow(
         input=simplejson.dumps(dict(
             cat=True,
@@ -26,11 +26,12 @@ def start_workflow(workflow_client, workflow_id):
         )),
         id=workflow_id,
         workflow_name='test',
-        version='0.1'
+        version='0.1',
+        workflow_start_to_close_timeout=workflow_start_to_close_timeout,
     )
 
 
-def poll_decision_and_respond(decision_client):
+def poll_decision_and_respond(decision_client, response_override_dict=None):
     decision_task = decision_client.poll()
 
     activity_id = str(uuid.uuid4())
@@ -92,6 +93,27 @@ def test_workflow(workflow_client, decision_client, activity_task_client):
     workflow_id = str(uuid.uuid4())
     start_workflow(workflow_client, workflow_id)
     poll_decision_and_respond(decision_client)
+    poll_activity_task_and_respond(activity_task_client)
+    poll_decision_and_finish_workflow(decision_client, workflow_client)
+
+
+def test_workflow_with_start_to_close_timeout(workflow_client, decision_client, activity_task_client):
+    workflow_id = str(uuid.uuid4())
+    start_workflow(workflow_client, workflow_id, workflow_start_to_close_timeout=10)
+    poll_decision_and_respond(decision_client)
+    poll_activity_task_and_respond(activity_task_client)
+    poll_decision_and_finish_workflow(decision_client, workflow_client)
+
+
+def test_workflow_with_activity_timeout(workflow_client, decision_client, activity_task_client):
+    workflow_id = str(uuid.uuid4())
+    start_workflow(workflow_client, workflow_id, workflow_start_to_close_timeout=10)
+    override_dict = {
+        'schedule_to_close_timeout': 30,
+        'schedule_to_start_timeout': 10,
+        'start_to_close_timeout': 20,
+    }
+    poll_decision_and_respond(decision_client, response_override_dict=override_dict)
     poll_activity_task_and_respond(activity_task_client)
     poll_decision_and_finish_workflow(decision_client, workflow_client)
 
