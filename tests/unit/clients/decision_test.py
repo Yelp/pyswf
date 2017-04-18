@@ -219,7 +219,7 @@ def test_finish_decision_with_activity(decision_client, decision_config, boto_cl
         'activity_name',
         'activity_version',
         'activity_input',
-        'override_config_dict',
+        {},
     )
 
     boto_client.respond_decision_task_completed.assert_called_once_with(
