@@ -213,18 +213,15 @@ class TestPollingWithBadResults:
 
 
 def test_finish_decision_with_activity(decision_client, decision_config, boto_client):
-    override_config_dict = {
-        'schedule_to_close_timeout': 123,
-        'schedule_to_start_timeout': 223,
-        'start_to_close_timeout': 233,
-    }
     decision_client.finish_decision_with_activity(
         'task_token',
         'activity_id',
         'activity_name',
         'activity_version',
         'activity_input',
-        override_config_dict,
+        schedule_to_close_timeout=123,
+        schedule_to_start_timeout=223,
+        start_to_close_timeout=233,
     )
 
     decisions = boto_client.respond_decision_task_completed.call_args[1]['decisions'][0]

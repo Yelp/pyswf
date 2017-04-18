@@ -157,8 +157,17 @@ class DecisionClient(object):
 
             kwargs['nextPageToken'] = next_page_token
 
-    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input,
-                                      override_config_dict=None):
+    def finish_decision_with_activity(
+        self,
+        task_token,
+        activity_id,
+        activity_name,
+        activity_version,
+        activity_input,
+        schedule_to_close_timeout=None,
+        schedule_to_start_timeout=None,
+        start_to_close_timeout=None,
+    ):
         """Responds to a given decision task's task_token to schedule an activity task to run.
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
@@ -173,10 +182,15 @@ class DecisionClient(object):
         :type identity: string
         :param activity_input: Freeform text of the input for the activity
         :type identity: string
-        :param override_config_dict: Override default config for scheduled activity timeouts.
-        It includes scheduleToCloseTimeout, scheduleToStartTimeout and startToCloseTimeout.
+        :param schedule_to_close_timeout: Override default timeout for activity from schedule to finish
         More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
-        :type identity: dict
+        :type identity: int
+        :param schedule_to_start_timeout: Override default timeout for activity from schedule to start
+        More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
+        :type identity: int
+        :param start_to_close_timeout: Override default timeout for activity from start to finish
+        More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
+        :type identity: int
         :return: None
         :rtype: NoneType
         """
@@ -186,7 +200,9 @@ class DecisionClient(object):
             activity_version,
             activity_input,
             self.decision_config,
-            override_config_dict,
+            schedule_to_close_timeout,
+            schedule_to_start_timeout,
+            start_to_close_timeout,
         )
 
         self.boto_client.respond_decision_task_completed(
@@ -222,11 +238,22 @@ def build_workflow_complete(result):
     }
 
 
-def build_activity_task(activity_id, activity_name, activity_version, input, decision_config, override_config_dict=None):
-    override_config_dict = override_config_dict or {}
-    schedule_to_close_timeout = override_config_dict.get('schedule_to_close_timeout', decision_config.schedule_to_close_timeout)
-    schedule_to_start_timeout = override_config_dict.get('schedule_to_start_timeout', decision_config.schedule_to_start_timeout)
-    start_to_close_timeout = override_config_dict.get('start_to_close_timeout', decision_config.start_to_close_timeout)
+def build_activity_task(
+    activity_id,
+    activity_name,
+    activity_version,
+    input,
+    decision_config,
+    schedule_to_close_timeout,
+    schedule_to_start_timeout,
+    start_to_close_timeout,
+):
+    if schedule_to_close_timeout is None:
+        schedule_to_start_timeout = decision_config.schedule_to_close_timeout
+    if schedule_to_start_timeout is None:
+        schedule_to_start_timeout = decision_config.schedule_to_close_timeout
+    if start_to_close_timeout is None:
+        start_to_close_timeout = decision_config.schedule_to_start_timeout
     return {
         'decisionType': 'ScheduleActivityTask',
         'scheduleActivityTaskDecisionAttributes': {
