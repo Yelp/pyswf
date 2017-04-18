@@ -249,11 +249,11 @@ def build_activity_task(
     start_to_close_timeout,
 ):
     if schedule_to_close_timeout is None:
-        schedule_to_start_timeout = decision_config.schedule_to_close_timeout
+        schedule_to_close_timeout = decision_config.schedule_to_close_timeout
     if schedule_to_start_timeout is None:
-        schedule_to_start_timeout = decision_config.schedule_to_close_timeout
+        schedule_to_start_timeout = decision_config.schedule_to_start_timeout
     if start_to_close_timeout is None:
-        start_to_close_timeout = decision_config.schedule_to_start_timeout
+        start_to_close_timeout = decision_config.start_to_close_timeout
     return {
         'decisionType': 'ScheduleActivityTask',
         'scheduleActivityTaskDecisionAttributes': {
