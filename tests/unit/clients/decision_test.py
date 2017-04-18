@@ -224,8 +224,8 @@ def test_finish_decision_with_activity(decision_client, decision_config, boto_cl
         'activity_input',
     )
 
-    decisions = boto_client.respond_decision_task_completed.call_args[1]['decisions'][0]
-    decision_attrs = decisions['scheduleActivityTaskDecisionAttributes']
+    decisions = boto_client.respond_decision_task_completed.call_args[1]['decisions']
+    decision_attrs = decisions[0]['scheduleActivityTaskDecisionAttributes']
     assert decision_attrs['scheduleToCloseTimeout'] == str(decision_config.schedule_to_close_timeout)
     assert decision_attrs['scheduleToStartTimeout'] == str(decision_config.schedule_to_start_timeout)
     assert decision_attrs['startToCloseTimeout'] == str(decision_config.start_to_close_timeout)
