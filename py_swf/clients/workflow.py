@@ -50,7 +50,8 @@ class WorkflowClient(object):
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
-        execution_start_to_close_timeout = workflow_start_to_close_timeout or self.workflow_client_config.execution_start_to_close_timeout
+        execution_start_to_close_timeout = workflow_start_to_close_timeout or \
+            self.workflow_client_config.execution_start_to_close_timeout
         return self.boto_client.start_workflow_execution(
             domain=self.workflow_client_config.domain,
             childPolicy='TERMINATE',
