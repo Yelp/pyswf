@@ -157,7 +157,7 @@ class DecisionClient(object):
 
             kwargs['nextPageToken'] = next_page_token
 
-    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input):
+    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input, override_config_dict):
         """Responds to a given decision task's task_token to schedule an activity task to run.
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
@@ -181,6 +181,7 @@ class DecisionClient(object):
             activity_version,
             activity_input,
             self.decision_config,
+            override_config_dict,
         )
 
         self.boto_client.respond_decision_task_completed(
@@ -216,7 +217,10 @@ def build_workflow_complete(result):
     }
 
 
-def build_activity_task(activity_id, activity_name, activity_version, input, decision_config):
+def build_activity_task(activity_id, activity_name, activity_version, input, decision_config, override_config_dict):
+    schedule_to_close_timeout = override_config_dict.get('schedule_to_close_timeout', None) or decision_config.schedule_to_close_timeout
+    schedule_to_start_timeout = override_config_dict.get('schedule_to_start_timeout', None) or decision_config.schedule_to_start_timeout
+    start_to_close_timeout = override_config_dict.get('start_to_close_timeout', None) or decision_config.start_to_close_timeout
     return {
         'decisionType': 'ScheduleActivityTask',
         'scheduleActivityTaskDecisionAttributes': {
@@ -229,9 +233,9 @@ def build_activity_task(activity_id, activity_name, activity_version, input, dec
             'taskList': {
                 'name': decision_config.task_list,
             },
-            'scheduleToCloseTimeout': str(decision_config.schedule_to_close_timeout),
-            'scheduleToStartTimeout': str(decision_config.schedule_to_start_timeout),
-            'startToCloseTimeout': str(decision_config.start_to_close_timeout),
+            'scheduleToCloseTimeout': str(schedule_to_close_timeout),
+            'scheduleToStartTimeout': str(schedule_to_start_timeout),
+            'startToCloseTimeout': str(start_to_close_timeout),
             'heartbeatTimeout': str(decision_config.heartbeat_timeout),
         },
     }

@@ -33,7 +33,7 @@ class WorkflowClient(object):
         self.workflow_client_config = workflow_client_config
         self.boto_client = boto_client
 
-    def start_workflow(self, input, id, workflow_name, version):
+    def start_workflow(self, input, id, workflow_name, version, workflow_start_to_close_timeout=None):
         """Enqueues and starts a workflow to SWF.
 
         Passthrough to :meth:`~SWF.Client.start_workflow_execution`.
@@ -50,6 +50,7 @@ class WorkflowClient(object):
         :returns: An AWS generated uuid that represents a unique identifier for the run of this workflow.
         :rtype: string
         """
+        execution_start_to_close_timeout = workflow_start_to_close_timeout or self.workflow_client_config.execution_start_to_close_timeout
         return self.boto_client.start_workflow_execution(
             domain=self.workflow_client_config.domain,
             childPolicy='TERMINATE',
@@ -62,7 +63,7 @@ class WorkflowClient(object):
             taskList={
                 'name': self.workflow_client_config.task_list,
             },
-            executionStartToCloseTimeout=str(self.workflow_client_config.execution_start_to_close_timeout),
+            executionStartToCloseTimeout=str(execution_start_to_close_timeout),
             taskStartToCloseTimeout=str(self.workflow_client_config.task_start_to_close_timeout),
         )['runId']
 
