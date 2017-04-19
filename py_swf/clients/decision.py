@@ -157,7 +157,17 @@ class DecisionClient(object):
 
             kwargs['nextPageToken'] = next_page_token
 
-    def finish_decision_with_activity(self, task_token, activity_id, activity_name, activity_version, activity_input):
+    def finish_decision_with_activity(
+        self,
+        task_token,
+        activity_id,
+        activity_name,
+        activity_version,
+        activity_input,
+        schedule_to_close_timeout=None,
+        schedule_to_start_timeout=None,
+        start_to_close_timeout=None,
+    ):
         """Responds to a given decision task's task_token to schedule an activity task to run.
 
         Passthrough to :meth:`~SWF.Client.respond_decision_task_completed`.
@@ -172,6 +182,15 @@ class DecisionClient(object):
         :type identity: string
         :param activity_input: Freeform text of the input for the activity
         :type identity: string
+        :param schedule_to_close_timeout: Override default timeout for activity from schedule to finish
+        More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
+        :type identity: int
+        :param schedule_to_start_timeout: Override default timeout for activity from schedule to start
+        More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
+        :type identity: int
+        :param start_to_close_timeout: Override default timeout for activity from start to finish
+        More info: http://docs.aws.amazon.com/amazonswf/latest/apireference/API_ScheduleActivityTaskDecisionAttributes.html
+        :type identity: int
         :return: None
         :rtype: NoneType
         """
@@ -181,6 +200,9 @@ class DecisionClient(object):
             activity_version,
             activity_input,
             self.decision_config,
+            schedule_to_close_timeout,
+            schedule_to_start_timeout,
+            start_to_close_timeout,
         )
 
         self.boto_client.respond_decision_task_completed(
@@ -216,7 +238,22 @@ def build_workflow_complete(result):
     }
 
 
-def build_activity_task(activity_id, activity_name, activity_version, input, decision_config):
+def build_activity_task(
+    activity_id,
+    activity_name,
+    activity_version,
+    input,
+    decision_config,
+    schedule_to_close_timeout,
+    schedule_to_start_timeout,
+    start_to_close_timeout,
+):
+    if schedule_to_close_timeout is None:
+        schedule_to_close_timeout = decision_config.schedule_to_close_timeout
+    if schedule_to_start_timeout is None:
+        schedule_to_start_timeout = decision_config.schedule_to_start_timeout
+    if start_to_close_timeout is None:
+        start_to_close_timeout = decision_config.start_to_close_timeout
     return {
         'decisionType': 'ScheduleActivityTask',
         'scheduleActivityTaskDecisionAttributes': {
@@ -229,9 +266,9 @@ def build_activity_task(activity_id, activity_name, activity_version, input, dec
             'taskList': {
                 'name': decision_config.task_list,
             },
-            'scheduleToCloseTimeout': str(decision_config.schedule_to_close_timeout),
-            'scheduleToStartTimeout': str(decision_config.schedule_to_start_timeout),
-            'startToCloseTimeout': str(decision_config.start_to_close_timeout),
+            'scheduleToCloseTimeout': str(schedule_to_close_timeout),
+            'scheduleToStartTimeout': str(schedule_to_start_timeout),
+            'startToCloseTimeout': str(start_to_close_timeout),
             'heartbeatTimeout': str(decision_config.heartbeat_timeout),
         },
     }

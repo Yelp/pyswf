@@ -42,6 +42,7 @@ def latest_close_date():
 
 
 def test_start_workflow(workflow_config, workflow_client, boto_client):
+    workflow_config.execution_start_to_close_timeout = 1
     boto_return = mock.MagicMock()
     boto_client.start_workflow_execution.return_value = boto_return
     workflow_name = 'test'
@@ -69,6 +70,39 @@ def test_start_workflow(workflow_config, workflow_client, boto_client):
         taskStartToCloseTimeout=str(workflow_config.task_start_to_close_timeout),
     )
     assert actual_run_id == boto_return['runId']
+    assert str(workflow_config.execution_start_to_close_timeout) ==\
+        boto_client.start_workflow_execution.call_args[1]['executionStartToCloseTimeout']
+
+
+def test_start_workflow_with_custom_execution_timeout(workflow_config, workflow_client, boto_client):
+    boto_return = mock.MagicMock()
+    boto_client.start_workflow_execution.return_value = boto_return
+    workflow_name = 'test'
+    version = '0.1'
+    execution_timeout = 123
+    workflow_client.start_workflow(
+        input='meow',
+        id='cat',
+        workflow_name=workflow_name,
+        version=version,
+        workflow_start_to_close_timeout=execution_timeout,
+    )
+
+    boto_client.start_workflow_execution.assert_called_once_with(
+        domain=workflow_config.domain,
+        childPolicy='TERMINATE',
+        workflowId='cat',
+        input='meow',
+        workflowType={
+            'name': workflow_name,
+            'version': version,
+        },
+        taskList={
+            'name': workflow_config.task_list,
+        },
+        executionStartToCloseTimeout=str(execution_timeout),
+        taskStartToCloseTimeout=str(workflow_config.task_start_to_close_timeout),
+    )
 
 
 def test_terminate_workflow(workflow_config, workflow_client, boto_client):

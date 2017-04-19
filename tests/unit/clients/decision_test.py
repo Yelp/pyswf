@@ -213,6 +213,9 @@ class TestPollingWithBadResults:
 
 
 def test_finish_decision_with_activity(decision_client, decision_config, boto_client):
+    decision_config.schedule_to_close_timeout = 1
+    decision_config.schedule_to_start_timeout = 2
+    decision_config.start_to_close_timeout = 3
     decision_client.finish_decision_with_activity(
         'task_token',
         'activity_id',
@@ -221,6 +224,35 @@ def test_finish_decision_with_activity(decision_client, decision_config, boto_cl
         'activity_input',
     )
 
+    decisions = boto_client.respond_decision_task_completed.call_args[1]['decisions']
+    decision_attrs = decisions[0]['scheduleActivityTaskDecisionAttributes']
+    assert decision_attrs['scheduleToCloseTimeout'] == str(decision_config.schedule_to_close_timeout)
+    assert decision_attrs['scheduleToStartTimeout'] == str(decision_config.schedule_to_start_timeout)
+    assert decision_attrs['startToCloseTimeout'] == str(decision_config.start_to_close_timeout)
+    boto_client.respond_decision_task_completed.assert_called_once_with(
+        taskToken='task_token',
+        # We rely on acceptence test for the schema of decisions
+        decisions=[mock.ANY],
+    )
+
+
+def test_finish_decision_with_activity_timeout_config(decision_client, decision_config, boto_client):
+    decision_client.finish_decision_with_activity(
+        'task_token',
+        'activity_id',
+        'activity_name',
+        'activity_version',
+        'activity_input',
+        schedule_to_close_timeout=123,
+        schedule_to_start_timeout=223,
+        start_to_close_timeout=233,
+    )
+
+    decisions = boto_client.respond_decision_task_completed.call_args[1]['decisions'][0]
+    decision_attrs = decisions['scheduleActivityTaskDecisionAttributes']
+    assert decision_attrs['scheduleToCloseTimeout'] == str(123)
+    assert decision_attrs['scheduleToStartTimeout'] == str(223)
+    assert decision_attrs['startToCloseTimeout'] == str(233)
     boto_client.respond_decision_task_completed.assert_called_once_with(
         taskToken='task_token',
         # We rely on acceptence test for the schema of decisions
