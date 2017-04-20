@@ -167,6 +167,7 @@ class DecisionClient(object):
         schedule_to_close_timeout=None,
         schedule_to_start_timeout=None,
         start_to_close_timeout=None,
+        heartbeat_timeout=None,
     ):
         """Responds to a given decision task's task_token to schedule an activity task to run.
 
@@ -203,6 +204,7 @@ class DecisionClient(object):
             schedule_to_close_timeout,
             schedule_to_start_timeout,
             start_to_close_timeout,
+            heartbeat_timeout,
         )
 
         self.boto_client.respond_decision_task_completed(
@@ -247,6 +249,7 @@ def build_activity_task(
     schedule_to_close_timeout,
     schedule_to_start_timeout,
     start_to_close_timeout,
+    heartbeat_timeout,
 ):
     if schedule_to_close_timeout is None:
         schedule_to_close_timeout = decision_config.schedule_to_close_timeout
@@ -254,6 +257,8 @@ def build_activity_task(
         schedule_to_start_timeout = decision_config.schedule_to_start_timeout
     if start_to_close_timeout is None:
         start_to_close_timeout = decision_config.start_to_close_timeout
+    if heartbeat_timeout is None:
+        heartbeat_timeout = decision_config.heartbeat_timeout
     return {
         'decisionType': 'ScheduleActivityTask',
         'scheduleActivityTaskDecisionAttributes': {
@@ -269,6 +274,6 @@ def build_activity_task(
             'scheduleToCloseTimeout': str(schedule_to_close_timeout),
             'scheduleToStartTimeout': str(schedule_to_start_timeout),
             'startToCloseTimeout': str(start_to_close_timeout),
-            'heartbeatTimeout': str(decision_config.heartbeat_timeout),
+            'heartbeatTimeout': str(heartbeat_timeout),
         },
     }
