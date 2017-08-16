@@ -17,7 +17,7 @@ py_swf
 
 py_swf is a library that provides a pythonic way to interact with the boto3 SWF client. It provides a thin client above boto3 and tries to provide the same API as boto3's SWF client. This library tries to group the API calls into SWF's framework of deciders, activity runners, and a client that can initiate and terminate workflows. More information on inputs to boto3 can be found in the boto3 :class:`~SWF.Client` class.
 
-The library provides 4 clients: 
+The library provides 4 clients:
  - A client that allows starting and force-termination of workflows.
  - A client that can poll for decision tasks and respond to decision tasks.
  - A client that can poll for activity tasks and respond to activity tasks.
@@ -48,12 +48,12 @@ Example daemon that listens on decision tasks
                         ...
                 )
 
-The heart of the daemon is the :class:`~py_swf.clients.decision.DecisionClient`. You must provide a valid bare boto3 client, and :class:`~py_swf.config_definitions.DecisionConfig` which represents common SWF inputs, such as domain, and some timeouts. 
+The heart of the daemon is the :class:`~py_swf.clients.decision.DecisionClient`. You must provide a valid bare boto3 client, and :class:`~py_swf.config_definitions.DecisionConfig` which represents common SWF inputs, such as domain, and some timeouts.
 
 Likewise, you must implement an activity runner:
 
 .. code-block:: python
-        
+
         import boto3
         from py_swf.config_definitions import ActivityTaskConfig
         from py_swf.clients.activity_task import ActivityTaskClient
