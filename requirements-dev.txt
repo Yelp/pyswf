@@ -1,7 +1,7 @@
 -r requirements.txt
 coverage
 flake8
-ipython
+ipython < 6.0.0  # 6.0 drops support for py27
 mock
 pre-commit>=0.4.2
 pytest
