@@ -19,31 +19,13 @@ from py_swf.config_definitions import DecisionConfig
 from py_swf.config_definitions import WorkflowClientConfig
 
 
-def load_testing_config():
-    with open('/etc/boto_cfg/itest-user.yaml') as f:
-        aws_config = yaml.safe_load(f)
-    DictConfiguration({
-        'sqs': {
-            'access_key': aws_config['aws_access_key_id'],
-            'secret_key': aws_config['aws_secret_access_key']
-        }
-    }, namespace='aws_credentials')
-    # Return it in case people want to use non-staticconf methods.
-    return aws_config
-
-
 @pytest.fixture
 def boto_client():
-    boto_config = load_testing_config()
     botocore_config = Config(
         connect_timeout=5,
         read_timeout=1,
     )
-    return boto3.Session(
-        aws_access_key_id=boto_config['aws_access_key_id'],
-        aws_secret_access_key=boto_config['aws_secret_access_key'],
-        region_name='us-west-1',
-    ).client('swf', config=botocore_config)
+    return boto3.Session().client('swf', config=botocore_config)
 
 
 @pytest.fixture
